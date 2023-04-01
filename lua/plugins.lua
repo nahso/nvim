@@ -1,0 +1,153 @@
+local map = vim.api.nvim_set_keymap
+local opt = {noremap = true, silent = true }
+
+-- ~/.local/share/nvim/site/pack/packer/
+local fn = vim.fn
+local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
+local paccker_bootstrap
+if fn.empty(fn.glob(install_path)) > 0 then
+    vim.notify("installing packer.nvim")
+    paccker_bootstrap = fn.system({
+        "git",
+        "clone",
+        "--depth",
+        "1",
+        "https://github.com/wbthomason/packer.nvim",
+        -- "https://gitcode.net/mirrors/wbthomason/packer.nvim",
+        install_path,
+    })
+
+    -- https://github.com/wbthomason/packer.nvim/issues/750
+    local rtp_addition = vim.fn.stdpath("data") .. "/site/pack/*/start/*"
+    if not string.find(vim.o.runtimepath, rtp_addition) then
+        vim.o.runtimepath = rtp_addition .. "," .. vim.o.runtimepath
+    end
+    vim.notify("finished.")
+end
+
+-- Use a protected call so we don't error out on first use
+local status_ok, packer = pcall(require, "packer")
+if not status_ok then
+    vim.notify("can't find packer.nvim, aborted")
+    return
+end
+
+packer.startup({
+    function(use)
+        use "wbthomason/packer.nvim"
+        use "folke/tokyonight.nvim"
+        use "kylechui/nvim-surround"
+        use "phaazon/hop.nvim"
+        use "windwp/nvim-autopairs"
+        use "ethanholz/nvim-lastplace"
+        use "neovim/nvim-lspconfig"
+
+        use 'hrsh7th/cmp-nvim-lsp'
+        use 'hrsh7th/cmp-buffer'
+        use 'hrsh7th/nvim-cmp'
+
+        use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+        use({
+            "nvim-treesitter/nvim-treesitter-textobjects",
+            after = "nvim-treesitter",
+            requires = "nvim-treesitter/nvim-treesitter",
+        })
+
+        use ({ 'ibhagwan/fzf-lua', requires = { 'nvim-tree/nvim-web-devicons' } })
+        use {'ojroques/nvim-osc52'}
+    end
+})
+
+
+vim.cmd([[colorscheme tokyonight]])
+
+require('nvim-surround').setup()
+
+require('hop').setup()
+vim.api.nvim_command('hi HopNextKey guifg=#00ff00')
+vim.api.nvim_command('hi HopNextKey1 guifg=#00ff00')
+vim.api.nvim_command('hi HopNextKey2 guifg=#00ff00')
+map("n", "s", ":HopChar2<CR>", opt)
+
+require("nvim-autopairs").setup()
+
+require('nvim-lastplace').setup({
+    lastplace_ignore_buftype = {"quickfix", "nofile", "help"},
+    lastplace_ignore_filetype = {"gitcommit", "gitrebase", "svn", "hgcommit"},
+    lastplace_open_folds = true
+})
+
+require'lspconfig'.pyright.setup{}
+vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
+vim.keymap.set("n", "<leader>er", vim.lsp.buf.references)
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
+
+local cmp = require'cmp'
+cmp.setup({
+    window = {
+        documentation = cmp.config.window.bordered(),
+    },
+    mapping = cmp.mapping.preset.insert({
+        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+        ['<C-f>'] = cmp.mapping.scroll_docs(4),
+        ['<C-Space>'] = cmp.mapping.complete(),
+        ['<C-e>'] = cmp.mapping.abort(),
+        ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    }),
+    sources = cmp.config.sources({
+        { name = 'nvim_lsp' },
+    }, {
+        { name = 'buffer' },
+    })
+})
+
+require'nvim-treesitter.configs'.setup {
+    -- A list of parser names, or "all" (the five listed parsers should always be installed)
+    ensure_installed = { "c", "lua", "vim", "help", "query" },
+
+    -- Install parsers synchronously (only applied to `ensure_installed`)
+    sync_install = false,
+
+    -- Automatically install missing parsers when entering buffer
+    -- Recommendation: set to false if you don't have `tree-sitter` CLI installed locally
+    auto_install = true,
+
+    highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = false,
+    },
+    textobjects = {
+        select = {
+            enable = true,
+            -- Automatically jump forward to textobj, similar to targets.vim
+            lookahead = true,
+            keymaps = {
+                ["af"] = "@function.outer",
+                ["if"] = "@function.inner",
+                ["ac"] = "@class.outer",
+                ["ic"] = "@class.inner",
+                ["aa"] = "@parameter.outer",
+                ["ia"] = "@parameter.inner",
+            },
+            selection_modes = {
+                ['@parameter.outer'] = 'v', -- charwise
+                ['@function.outer'] = 'V', -- linewise
+                ['@class.outer'] = '<c-v>', -- blockwise
+            },
+        },
+    },
+}
+
+require('fzf-lua').setup{}
+
+require('osc52').setup {
+  max_length = 0,      -- Maximum length of selection (0 for no limit)
+  silent     = false,  -- Disable message on successful copy
+  trim       = false,  -- Trim surrounding whitespaces before copy
+}
+vim.keymap.set('n', '<A-w>', require('osc52').copy_operator, {expr = true})
+vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
+vim.keymap.set('v', '<A-w>', require('osc52').copy_visual)

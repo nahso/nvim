@@ -6,7 +6,7 @@ local opt = {noremap = true, silent = true }
 
 map("n", "s", "", opt)
 map("n", "<leader>fs", ":w<cr>", opt)
-map("n", "<leader>ff", ":e ", opt)
+--map("n", "<leader>ff", ":e ", opt)
 map("n", "<leader><cr>", ":noh<cr>", opt)
 map("n", "Y", "y$", opt)
 

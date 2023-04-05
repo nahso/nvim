@@ -1,7 +1,7 @@
+-- ~/.local/share/nvim/site/pack/packer/
 local map = vim.api.nvim_set_keymap
 local opt = {noremap = true, silent = true }
 
--- ~/.local/share/nvim/site/pack/packer/
 local fn = vim.fn
 local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 local paccker_bootstrap
@@ -36,6 +36,8 @@ packer.startup({
     function(use)
         use "wbthomason/packer.nvim"
         use "folke/tokyonight.nvim"
+        use 'NTBBloodbath/doom-one.nvim'
+
         use "kylechui/nvim-surround"
         use "phaazon/hop.nvim"
         use "windwp/nvim-autopairs"
@@ -53,13 +55,21 @@ packer.startup({
             requires = "nvim-treesitter/nvim-treesitter",
         })
 
-        use ({ 'ibhagwan/fzf-lua', requires = { 'nvim-tree/nvim-web-devicons' } })
-        use {'ojroques/nvim-osc52'}
+        use 'nvim-tree/nvim-web-devicons'
+        use 'ibhagwan/fzf-lua'
+        use 'ojroques/nvim-osc52'
+        use 'Pocco81/auto-save.nvim'
+        use 'airblade/vim-gitgutter'
+        use 'preservim/nerdcommenter'
+        use 'ludovicchabant/vim-gutentags'
+        use 'djoshea/vim-autoread'
+        use "lukas-reineke/indent-blankline.nvim"
+        use "NMAC427/guess-indent.nvim"
     end
 })
 
 
-vim.cmd([[colorscheme tokyonight]])
+vim.cmd([[colorscheme doom-one]])
 
 require('nvim-surround').setup()
 
@@ -67,7 +77,8 @@ require('hop').setup()
 vim.api.nvim_command('hi HopNextKey guifg=#00ff00')
 vim.api.nvim_command('hi HopNextKey1 guifg=#00ff00')
 vim.api.nvim_command('hi HopNextKey2 guifg=#00ff00')
-map("n", "s", ":HopChar2<CR>", opt)
+vim.keymap.set("n", "s", require'hop'.hint_char2)
+vim.keymap.set("v", "s", require'hop'.hint_char2)
 
 require("nvim-autopairs").setup()
 
@@ -78,8 +89,9 @@ require('nvim-lastplace').setup({
 })
 
 require'lspconfig'.pyright.setup{}
+require'lspconfig'.clangd.setup{}
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
-vim.keymap.set("n", "<leader>er", vim.lsp.buf.references)
+-- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references)
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
@@ -89,6 +101,7 @@ local cmp = require'cmp'
 cmp.setup({
     window = {
         documentation = cmp.config.window.bordered(),
+        completion = cmp.config.window.bordered(),
     },
     mapping = cmp.mapping.preset.insert({
         ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -104,6 +117,7 @@ cmp.setup({
     })
 })
 
+require("nvim-treesitter.install").prefer_git = true
 require'nvim-treesitter.configs'.setup {
     -- A list of parser names, or "all" (the five listed parsers should always be installed)
     ensure_installed = { "c", "lua", "vim", "help", "query" },
@@ -142,6 +156,12 @@ require'nvim-treesitter.configs'.setup {
 }
 
 require('fzf-lua').setup{}
+vim.keymap.set('n', '<leader>fr', require('fzf-lua').oldfiles)
+vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers)
+vim.keymap.set('n', '<leader>ff', require('fzf-lua').files)
+vim.keymap.set('n', '<leader>fg', require('fzf-lua').git_files)
+vim.keymap.set('n', '<leader>fl', require('fzf-lua').lines)
+vim.keymap.set('n', '<leader>er', require('fzf-lua').lsp_references)
 
 require('osc52').setup {
   max_length = 0,      -- Maximum length of selection (0 for no limit)
@@ -151,3 +171,27 @@ require('osc52').setup {
 vim.keymap.set('n', '<A-w>', require('osc52').copy_operator, {expr = true})
 vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
 vim.keymap.set('v', '<A-w>', require('osc52').copy_visual)
+
+require'auto-save'.setup{}
+
+map('n', ']h', '<Plug>(GitGutterNextHunk)', opt)
+map('n', '[h', '<Plug>(GitGutterPrevHunk)', opt)
+
+vim.cmd([[
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+let g:gutentags_ctags_tagfile = '.tags'
+
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+if !isdirectory(s:vim_tags)
+   silent! call mkdir(s:vim_tags, 'p')
+endif
+
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+]])
+
+require("indent_blankline").setup {}
+
+require('guess-indent').setup {}

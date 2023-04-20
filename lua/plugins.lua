@@ -65,6 +65,24 @@ packer.startup({
         use 'djoshea/vim-autoread'
         use "lukas-reineke/indent-blankline.nvim"
         use "NMAC427/guess-indent.nvim"
+
+        use {
+            'goolord/alpha-nvim',
+            requires = { 'nvim-tree/nvim-web-devicons' },
+            config = function ()
+                require'alpha'.setup(require'alpha.themes.startify'.config)
+            end
+        }
+
+        use {
+            'nvim-tree/nvim-tree.lua',
+            requires = {
+                'nvim-tree/nvim-web-devicons', -- optional
+            },
+            config = function()
+                require("nvim-tree").setup {}
+            end
+        }
     end
 })
 
@@ -160,13 +178,15 @@ vim.keymap.set('n', '<leader>fr', require('fzf-lua').oldfiles)
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers)
 vim.keymap.set('n', '<leader>ff', require('fzf-lua').files)
 vim.keymap.set('n', '<leader>fg', require('fzf-lua').git_files)
-vim.keymap.set('n', '<leader>fl', require('fzf-lua').lines)
+vim.keymap.set('n', '<leader>fl', require('fzf-lua').blines)
 vim.keymap.set('n', '<leader>er', require('fzf-lua').lsp_references)
+vim.keymap.set('n', '<leader>f]', require('fzf-lua').tags_grep_cword)
+vim.keymap.set('n', '<leader>t', require('fzf-lua').btags)
 
 require('osc52').setup {
-  max_length = 0,      -- Maximum length of selection (0 for no limit)
-  silent     = false,  -- Disable message on successful copy
-  trim       = false,  -- Trim surrounding whitespaces before copy
+    max_length = 0,      -- Maximum length of selection (0 for no limit)
+    silent     = false,  -- Disable message on successful copy
+    trim       = false,  -- Trim surrounding whitespaces before copy
 }
 vim.keymap.set('n', '<A-w>', require('osc52').copy_operator, {expr = true})
 vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
@@ -184,12 +204,15 @@ let g:gutentags_ctags_tagfile = '.tags'
 let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
 if !isdirectory(s:vim_tags)
-   silent! call mkdir(s:vim_tags, 'p')
+    silent! call mkdir(s:vim_tags, 'p')
 endif
 
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+if executable('rg')
+  let g:gutentags_file_list_command = 'rg --files'
+endif
 ]])
 
 require("indent_blankline").setup {}

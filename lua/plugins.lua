@@ -83,6 +83,11 @@ packer.startup({
                 require("nvim-tree").setup {}
             end
         }
+
+        use {
+            "SmiteshP/nvim-navic",
+            requires = "neovim/nvim-lspconfig"
+        }
     end
 })
 
@@ -106,8 +111,22 @@ require('nvim-lastplace').setup({
     lastplace_open_folds = true
 })
 
-require'lspconfig'.pyright.setup{}
-require'lspconfig'.clangd.setup{}
+local navic = require("nvim-navic")
+local on_attach = function(client, bufnr)
+    if client.server_capabilities.documentSymbolProvider then
+        navic.attach(client, bufnr)
+    end
+end
+
+require'lspconfig'.pyright.setup{
+    on_attach = on_attach
+}
+require'lspconfig'.clangd.setup{
+    on_attach = on_attach
+}
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+-- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
+
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)

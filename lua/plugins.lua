@@ -117,10 +117,11 @@ require('nvim-lastplace').setup({
 })
 
 local navic = require("nvim-navic")
+local winbar_str = "%{%v:lua.require'nvim-navic'.get_location()%}"
 local on_attach = function(client, bufnr)
     if client.server_capabilities.documentSymbolProvider then
         navic.attach(client, bufnr)
-        vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+        vim.o.winbar = winbar_str
         -- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
     end
 end
@@ -131,6 +132,14 @@ require'lspconfig'.pyright.setup{
 require'lspconfig'.clangd.setup{
     on_attach = on_attach
 }
+local toggle_winbar = function()
+    if vim.o.winbar == "" then
+        vim.o.winbar = winbar_str
+    else
+        vim.o.winbar = ""
+    end
+end
+vim.keymap.set("n", "<leader>eb", toggle_winbar)
 
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead

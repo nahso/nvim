@@ -88,6 +88,11 @@ packer.startup({
             "SmiteshP/nvim-navic",
             requires = "neovim/nvim-lspconfig"
         }
+
+        use {
+            'stevearc/aerial.nvim',
+            config = function() require('aerial').setup() end
+        }
     end
 })
 
@@ -115,6 +120,8 @@ local navic = require("nvim-navic")
 local on_attach = function(client, bufnr)
     if client.server_capabilities.documentSymbolProvider then
         navic.attach(client, bufnr)
+        vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+        -- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
     end
 end
 
@@ -124,8 +131,6 @@ require'lspconfig'.pyright.setup{
 require'lspconfig'.clangd.setup{
     on_attach = on_attach
 }
-vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
--- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead
@@ -237,3 +242,14 @@ endif
 require("indent_blankline").setup {}
 
 require('guess-indent').setup {}
+
+require('aerial').setup({
+  -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+  on_attach = function(bufnr)
+    -- Jump forwards/backwards with '{' and '}'
+    vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
+    vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
+  end
+})
+-- You probably also want to set a keymap to toggle aerial
+vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')

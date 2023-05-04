@@ -86,11 +86,6 @@ packer.startup({
         }
 
         use {
-            "SmiteshP/nvim-navic",
-            requires = "neovim/nvim-lspconfig"
-        }
-
-        use {
             'stevearc/aerial.nvim',
             config = function() require('aerial').setup() end
         }
@@ -117,30 +112,8 @@ require('nvim-lastplace').setup({
     lastplace_open_folds = true
 })
 
-local navic = require("nvim-navic")
-local winbar_str = "%{%v:lua.require'nvim-navic'.get_location()%}"
-local on_attach = function(client, bufnr)
-    if client.server_capabilities.documentSymbolProvider then
-        navic.attach(client, bufnr)
-        --vim.o.winbar = winbar_str
-        -- vim.o.statusline = "%{%v:lua.require'nvim-navic'.get_location()%}"
-    end
-end
-
-require'lspconfig'.pyright.setup{
-    on_attach = on_attach
-}
-require'lspconfig'.clangd.setup{
-    on_attach = on_attach
-}
-local toggle_winbar = function()
-    if vim.o.winbar == "" then
-        vim.o.winbar = winbar_str
-    else
-        vim.o.winbar = ""
-    end
-end
-vim.keymap.set("n", "<leader>eb", toggle_winbar)
+require'lspconfig'.pyright.setup{}
+require'lspconfig'.clangd.setup{}
 
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead
@@ -267,3 +240,18 @@ require('aerial').setup({
 })
 -- You probably also want to set a keymap to toggle aerial
 vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
+
+require'treesitter-context'.setup{
+    enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+    max_lines = 3, -- How many lines the window should span. Values <= 0 mean no limit.
+    min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+    line_numbers = true,
+    multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
+    trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+    mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+    -- Separator between context and content. Should be a single character string, like '-'.
+    -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+    separator = nil,
+    zindex = 20, -- The Z-index of the context window
+}
+vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])

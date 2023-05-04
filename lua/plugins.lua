@@ -54,6 +54,7 @@ packer.startup({
             after = "nvim-treesitter",
             requires = "nvim-treesitter/nvim-treesitter",
         })
+        use 'nvim-treesitter/nvim-treesitter-context'
 
         use 'nvim-tree/nvim-web-devicons'
         use 'ibhagwan/fzf-lua'

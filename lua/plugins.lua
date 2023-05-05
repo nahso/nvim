@@ -203,6 +203,7 @@ require'auto-save'.setup{}
 
 map('n', ']h', '<Plug>(GitGutterNextHunk)', opt)
 map('n', '[h', '<Plug>(GitGutterPrevHunk)', opt)
+vim.cmd([[command U GitGutterUndoHunk]])
 
 vim.cmd([[
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']

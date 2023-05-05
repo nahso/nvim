@@ -255,3 +255,9 @@ require'treesitter-context'.setup{
     zindex = 20, -- The Z-index of the context window
 }
 vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
+
+vim.cmd([[
+let g:copilot_proxy = getenv('http_proxy')
+imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
+]])

@@ -180,7 +180,11 @@ require'nvim-treesitter.configs'.setup {
     },
 }
 
-require('fzf-lua').setup{}
+require('fzf-lua').setup{
+    oldfiles = {
+        include_current_session = true,  -- include bufs from current session
+    },
+}
 vim.keymap.set('n', '<leader>fr', require('fzf-lua').oldfiles)
 vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers)
 vim.keymap.set('n', '<leader>ff', require('fzf-lua').files)
@@ -215,11 +219,12 @@ if !isdirectory(s:vim_tags)
     silent! call mkdir(s:vim_tags, 'p')
 endif
 
-let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
 let g:gutentags_ctags_extra_args += ['--exclude=*.md']
-if filereadable("filename")
+if filereadable(".gitignore")
     let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
 endif
 if executable('rg')

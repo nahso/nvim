@@ -62,7 +62,7 @@ vim.o.showmode = false
 
 vim.opt.backspace = "indent,eol,start"
 
-vim.o.list = true
+vim.o.list = false
 vim.o.listchars = "trail:·"
 
 -- disable netrw at the very start of your init.lua (strongly advised)

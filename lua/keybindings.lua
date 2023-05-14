@@ -4,6 +4,7 @@ vim.g.maplocalleader = " "
 local map = vim.api.nvim_set_keymap
 local opt = {noremap = true, silent = true }
 
+map("n", "q:", "", opt)
 map("n", "s", "", opt)
 map("n", "<leader>fs", ":w<cr>", opt)
 --map("n", "<leader>ff", ":e ", opt)

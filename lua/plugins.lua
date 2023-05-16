@@ -90,6 +90,8 @@ packer.startup({
             'stevearc/aerial.nvim',
             config = function() require('aerial').setup() end
         }
+
+        use 'RRethy/vim-illuminate'
     end
 })
 

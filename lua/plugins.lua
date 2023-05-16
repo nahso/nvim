@@ -61,7 +61,8 @@ packer.startup({
         use 'ojroques/nvim-osc52'
         use 'Pocco81/auto-save.nvim'
         use 'airblade/vim-gitgutter'
-        use 'preservim/nerdcommenter'
+        -- use 'preservim/nerdcommenter'
+        use 'numToStr/Comment.nvim'
         use 'ludovicchabant/vim-gutentags'
         use 'djoshea/vim-autoread'
         use "lukas-reineke/indent-blankline.nvim"

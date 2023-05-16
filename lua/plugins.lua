@@ -96,7 +96,8 @@ packer.startup({
 })
 
 
-vim.cmd([[colorscheme doom-one]])
+vim.cmd([[colorscheme tokyonight]])
+-- vim.cmd([[colorscheme doom-one]])
 
 require('nvim-surround').setup()
 

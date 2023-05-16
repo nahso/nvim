@@ -271,3 +271,8 @@ let g:copilot_proxy = getenv('http_proxy')
 imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
 let g:copilot_no_tab_map = v:true
 ]])
+
+-- default configuration
+require('illuminate').configure({
+    delay = 0,
+})

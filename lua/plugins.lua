@@ -68,7 +68,6 @@ packer.startup({
                 require('Comment').setup()
             end
         }
-        use 'numToStr/Comment.nvim'
         use 'ludovicchabant/vim-gutentags'
         use 'djoshea/vim-autoread'
         use "lukas-reineke/indent-blankline.nvim"

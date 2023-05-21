@@ -295,7 +295,7 @@ vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
 -- default configuration
 require('illuminate').configure({
-    delay = 0,
+    -- delay = 0,
 })
 
 require("copilot").setup {}

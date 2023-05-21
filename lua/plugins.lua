@@ -287,11 +287,9 @@ require'treesitter-context'.setup{
 }
 vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
--- vim.cmd([[
--- let g:copilot_proxy = getenv('http_proxy')
--- imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
--- let g:copilot_no_tab_map = v:true
--- ]])
+vim.cmd([[
+let g:copilot_proxy = getenv('http_proxy')
+]])
 
 -- default configuration
 require('illuminate').configure({

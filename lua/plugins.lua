@@ -62,6 +62,12 @@ packer.startup({
         use 'Pocco81/auto-save.nvim'
         use 'airblade/vim-gitgutter'
         -- use 'preservim/nerdcommenter'
+        use {
+            'numToStr/Comment.nvim',
+            config = function()
+                require('Comment').setup()
+            end
+        }
         use 'numToStr/Comment.nvim'
         use 'ludovicchabant/vim-gutentags'
         use 'djoshea/vim-autoread'

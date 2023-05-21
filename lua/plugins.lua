@@ -203,6 +203,11 @@ vim.keymap.set('n', '<leader>fl', require('fzf-lua').blines)
 vim.keymap.set('n', '<leader>er', require('fzf-lua').lsp_references)
 vim.keymap.set('n', '<leader>f]', require('fzf-lua').tags_grep_cword)
 vim.keymap.set('n', '<leader>t', require('fzf-lua').btags)
+vim.keymap.set('n', '<leader>ss', require('fzf-lua').grep_project)
+vim.keymap.set('n', '<leader>sd', require('fzf-lua').grep_cword)
+vim.keymap.set('n', '<leader>sD', require('fzf-lua').grep_cWORD)
+vim.keymap.set('n', '<A-x>', require('fzf-lua').commands)
+vim.keymap.set('n', '<leader>r', require('fzf-lua').resume)
 
 require('osc52').setup {
     max_length = 0,      -- Maximum length of selection (0 for no limit)

@@ -180,7 +180,16 @@ require('nvim-lastplace').setup({
 })
 
 require'lspconfig'.pyright.setup{}
-require'lspconfig'.clangd.setup{}
+
+local cmp_nvim_lsp = require "cmp_nvim_lsp"
+require("lspconfig").clangd.setup {
+  on_attach = on_attach,
+  capabilities = cmp_nvim_lsp.default_capabilities(),
+  cmd = {
+    "clangd",
+    "--offset-encoding=utf-16",
+  },
+}
 
 vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead

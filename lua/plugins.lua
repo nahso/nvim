@@ -115,7 +115,7 @@ packer.startup({
             end
         }
 
-        use { "zbirenbaum/copilot.lua" }
+        use 'github/copilot.vim'
     end
 })
 
@@ -323,6 +323,8 @@ vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
 vim.cmd([[
 let g:copilot_proxy = getenv('http_proxy')
+imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
 ]])
 
 -- default configuration
@@ -330,4 +332,3 @@ require('illuminate').configure({
     -- delay = 0,
 })
 
-require("copilot").setup {}

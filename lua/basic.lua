@@ -41,9 +41,9 @@ vim.o.swapfile = false
 
 vim.o.updatetime = 300
 
-vim.cmd([[
-set notimeout
-]])
+-- vim.o.timeoutlen = 500
+vim.o.timeout = false
+vim.o.ttimeout = false
 
 vim.o.splitbelow = true
 vim.o.splitright = true

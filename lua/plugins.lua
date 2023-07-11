@@ -63,6 +63,7 @@ packer.startup({
             requires = "nvim-treesitter/nvim-treesitter",
         })
         use 'nvim-treesitter/nvim-treesitter-context'
+        use 'wellle/targets.vim'
 
         use 'nvim-tree/nvim-web-devicons'
         use 'ibhagwan/fzf-lua'
@@ -223,8 +224,6 @@ require'nvim-treesitter.configs'.setup {
                 ["if"] = "@function.inner",
                 ["ac"] = "@class.outer",
                 ["ic"] = "@class.inner",
-                ["aa"] = "@parameter.outer",
-                ["ia"] = "@parameter.inner",
             },
             selection_modes = {
                 ['@parameter.outer'] = 'v', -- charwise

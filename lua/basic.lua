@@ -1,6 +1,8 @@
 vim.g.encoding = "UTF-8"
 vim.o.fileencoding = 'utf-8'
 
+
+
 vim.o.scrolloff = 5
 vim.o.sidescrolloff = 5
 
@@ -41,9 +43,9 @@ vim.o.swapfile = false
 
 vim.o.updatetime = 300
 
--- vim.o.timeoutlen = 
--- vim.o.timeout = false
--- vim.o.ttimeout = false
+vim.o.timeoutlen = 0
+vim.o.timeout = false
+vim.o.ttimeout = false
 
 vim.o.splitbelow = true
 vim.o.splitright = true
@@ -53,6 +55,7 @@ vim.g.completeopt = "menu,menuone,noselect,noinsert"
 vim.o.background = "dark"
 vim.o.termguicolors = true
 vim.opt.termguicolors = true
+vim.env.NVIM_TUI_ENABLE_TRUE_COLOR = 1
 
 vim.o.wildmenu = true
 

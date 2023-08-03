@@ -106,15 +106,6 @@ packer.startup({
         }
 
         use 'RRethy/vim-illuminate'
-        use {
-            'rmagatti/auto-session',
-            config = function()
-                require("auto-session").setup {
-                    log_level = "error",
-                    auto_session_suppress_dirs = { "~/", "~/Downloads", "/"},
-                }
-            end
-        }
 
         use 'github/copilot.vim'
     end
@@ -251,7 +242,7 @@ vim.keymap.set('n', '<leader>ss', require('fzf-lua').grep_project)
 vim.keymap.set('n', '<leader>sd', require('fzf-lua').grep_cword)
 vim.keymap.set('n', '<leader>sD', require('fzf-lua').grep_cWORD)
 vim.keymap.set('n', '<A-x>', require('fzf-lua').commands)
-vim.keymap.set('n', '<leader>r', require('fzf-lua').resume)
+vim.keymap.set('n', '<leader>rr', require('fzf-lua').resume)
 
 require('osc52').setup {
     max_length = 0,      -- Maximum length of selection (0 for no limit)
@@ -281,7 +272,7 @@ let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
 let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
 let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
 let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
-let g:gutentags_ctags_extra_args += ['--exclude=*.md']
+let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
 if filereadable(".gitignore")
     let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
 endif

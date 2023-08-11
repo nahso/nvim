@@ -50,8 +50,6 @@ packer.startup({
 
         use({
             "L3MON4D3/LuaSnip",
-            -- follow latest release.
-            tag = "v<CurrentMajor>.*", -- Replace <CurrentMajor> by the latest released major (first number of latest release)
             -- install jsregexp (optional!:).
             run = "make install_jsregexp"
         })
@@ -82,14 +80,6 @@ packer.startup({
         use "lukas-reineke/indent-blankline.nvim"
         use "NMAC427/guess-indent.nvim"
 
-        --use {
-        --    'goolord/alpha-nvim',
-        --    requires = { 'nvim-tree/nvim-web-devicons' },
-        --    config = function ()
-        --        require'alpha'.setup(require'alpha.themes.startify'.config)
-        --    end
-        --}
-
         use {
             'nvim-tree/nvim-tree.lua',
             requires = {
@@ -108,6 +98,28 @@ packer.startup({
         use 'RRethy/vim-illuminate'
 
         use 'github/copilot.vim'
+
+        use 'lambdalisue/suda.vim'
+
+        use {
+            "klen/nvim-config-local",
+            config = function()
+                require('config-local').setup {
+                    -- Default options (optional)
+
+                    -- Config file patterns to load (lua supported)
+                    config_files = { ".nvim.lua", ".nvimrc", ".exrc" },
+
+                    -- Where the plugin keeps files data
+                    hashfile = vim.fn.stdpath("data") .. "/config-local",
+
+                    autocommands_create = true, -- Create autocommands (VimEnter, DirectoryChanged)
+                    commands_create = true,     -- Create commands (ConfigLocalSource, ConfigLocalEdit, ConfigLocalTrust, ConfigLocalIgnore)
+                    silent = false,             -- Disable plugin messages (Config loaded/ignored)
+                    lookup_parents = false,     -- Lookup config files in parent directories
+                }
+            end
+        }
     end
 })
 
@@ -136,15 +148,15 @@ require'lspconfig'.pyright.setup{}
 
 local cmp_nvim_lsp = require "cmp_nvim_lsp"
 require("lspconfig").clangd.setup {
-  on_attach = on_attach,
-  capabilities = cmp_nvim_lsp.default_capabilities(),
-  cmd = {
-    "clangd",
-    "--offset-encoding=utf-16",
-  },
+    on_attach = on_attach,
+    capabilities = cmp_nvim_lsp.default_capabilities(),
+    cmd = {
+        "clangd",
+        "--offset-encoding=utf-16",
+    },
 }
 
-vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
+-- vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
@@ -152,9 +164,9 @@ vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
 
 local has_words_before = function()
-  unpack = unpack or table.unpack
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+    unpack = unpack or table.unpack
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
 
 local luasnip = require("luasnip")
@@ -192,7 +204,7 @@ cmp.setup({
 require("nvim-treesitter.install").prefer_git = true
 require'nvim-treesitter.configs'.setup {
     -- A list of parser names, or "all" (the five listed parsers should always be installed)
-    ensure_installed = { "c", "lua", "vim", "help", "query" },
+    ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
 
     -- Install parsers synchronously (only applied to `ensure_installed`)
     sync_install = false,
@@ -225,24 +237,36 @@ require'nvim-treesitter.configs'.setup {
     },
 }
 
-require('fzf-lua').setup{
-    oldfiles = {
-        include_current_session = true,  -- include bufs from current session
-    },
+local fzf = require('fzf-lua')
+fzf.setup{
+    winopts = {
+        fullscreen = true,
+        preview = {
+            vertical = 'down:30%',
+            layout = 'vertical'
+        },
+    }
 }
-vim.keymap.set('n', '<leader>fr', require('fzf-lua').oldfiles)
-vim.keymap.set('n', '<leader>bb', require('fzf-lua').buffers)
-vim.keymap.set('n', '<leader>ff', require('fzf-lua').files)
-vim.keymap.set('n', '<leader>fg', require('fzf-lua').git_files)
-vim.keymap.set('n', '<leader>fl', require('fzf-lua').blines)
-vim.keymap.set('n', '<leader>er', require('fzf-lua').lsp_references)
-vim.keymap.set('n', '<leader>f]', require('fzf-lua').tags_grep_cword)
-vim.keymap.set('n', '<leader>t', require('fzf-lua').btags)
-vim.keymap.set('n', '<leader>ss', require('fzf-lua').grep_project)
-vim.keymap.set('n', '<leader>sd', require('fzf-lua').grep_cword)
-vim.keymap.set('n', '<leader>sD', require('fzf-lua').grep_cWORD)
-vim.keymap.set('n', '<A-x>', require('fzf-lua').commands)
-vim.keymap.set('n', '<leader>rr', require('fzf-lua').resume)
+
+vim.keymap.set('n', '<leader>ff', fzf.files)
+vim.keymap.set('n', '<leader>fd', fzf.git_files)
+vim.keymap.set('n', '<leader>fr', fzf.oldfiles)
+vim.keymap.set('n', '<leader>rs', fzf.resume)
+vim.keymap.set('n', '<leader>tt', fzf.tags)
+vim.keymap.set('n', '<leader>tb', fzf.btags)
+vim.keymap.set('n', '<leader>tl', fzf.tags_live_grep)
+vim.keymap.set('n', '<leader>bt', fzf.tags_grep_cword)
+vim.keymap.set('n', '<leader>bb', fzf.buffers)
+vim.keymap.set('n', '<leader>er', fzf.lsp_references)
+vim.keymap.set('n', '<leader>sf', fzf.live_grep)
+vim.keymap.set('n', '<leader>ss', fzf.grep_project)
+vim.keymap.set('n', '<leader>sd', fzf.grep_cword)
+vim.keymap.set('n', '<leader>sD', fzf.grep_cWORD)
+
+vim.keymap.set('n', '<A-x>', fzf.commands)
+vim.keymap.set('i', '<A-x>', fzf.commands)
+vim.keymap.set('n', '<C-s>', fzf.blines)
+vim.keymap.set('i', '<C-s>', fzf.blines)
 
 require('osc52').setup {
     max_length = 0,      -- Maximum length of selection (0 for no limit)
@@ -266,59 +290,59 @@ let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
 if !isdirectory(s:vim_tags)
     silent! call mkdir(s:vim_tags, 'p')
-endif
+    endif
 
-let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
-let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
-let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
-let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
-let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
-if filereadable(".gitignore")
-    let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
-endif
-if executable('rg')
-  let g:gutentags_file_list_command = 'rg --files'
-endif
-]])
+    let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
+    let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+    let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+    let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
+    let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
+    if filereadable(".gitignore")
+        let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
+        endif
+        if executable('rg')
+            let g:gutentags_file_list_command = 'rg --files'
+            endif
+            ]])
 
-require("indent_blankline").setup {}
+            require("indent_blankline").setup {}
 
-require('guess-indent').setup {}
+            require('guess-indent').setup {}
 
-require('aerial').setup({
-  -- optionally use on_attach to set keymaps when aerial has attached to a buffer
-  on_attach = function(bufnr)
-    -- Jump forwards/backwards with '{' and '}'
-    vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
-    vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
-  end
-})
--- You probably also want to set a keymap to toggle aerial
-vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
+            require('aerial').setup({
+                -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+                on_attach = function(bufnr)
+                    -- Jump forwards/backwards with '{' and '}'
+                    vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
+                    vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
+                end
+            })
+            -- You probably also want to set a keymap to toggle aerial
+            vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
 
-require'treesitter-context'.setup{
-    enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-    max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-    min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-    line_numbers = true,
-    multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
-    trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-    mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
-    -- Separator between context and content. Should be a single character string, like '-'.
-    -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-    separator = nil,
-    zindex = 20, -- The Z-index of the context window
-}
-vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
+            require'treesitter-context'.setup{
+                enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+                max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+                min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+                line_numbers = true,
+                multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
+                trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+                mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+                -- Separator between context and content. Should be a single character string, like '-'.
+                -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+                separator = nil,
+                zindex = 20, -- The Z-index of the context window
+            }
+            vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
-vim.cmd([[
-let g:copilot_proxy = getenv('http_proxy')
-imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
-let g:copilot_no_tab_map = v:true
-]])
+            vim.cmd([[
+            let g:copilot_proxy = getenv('http_proxy')
+            imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
+            let g:copilot_no_tab_map = v:true
+            ]])
 
--- default configuration
-require('illuminate').configure({
-    -- delay = 0,
-})
+            -- default configuration
+            require('illuminate').configure({
+                -- delay = 0,
+            })
 

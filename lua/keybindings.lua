@@ -23,3 +23,4 @@ map("i", "<c-f>", "<right>", opt)
 map("i", "<c-b>", "<left>", opt)
 map("i", "<c-g>", "<esc>", opt)
 
+map("t", "<A-i>", "<C-\\><C-n>", opt)

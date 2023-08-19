@@ -290,59 +290,59 @@ let s:vim_tags = expand('~/.cache/tags')
 let g:gutentags_cache_dir = s:vim_tags
 if !isdirectory(s:vim_tags)
     silent! call mkdir(s:vim_tags, 'p')
-    endif
+endif
 
-    let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
-    let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
-    let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
-    let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
-    let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
-    if filereadable(".gitignore")
-        let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
-        endif
-        if executable('rg')
-            let g:gutentags_file_list_command = 'rg --files'
-            endif
-            ]])
+let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
+let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
+if filereadable(".gitignore")
+    let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
+endif
+if executable('rg')
+    let g:gutentags_file_list_command = 'rg --files'
+endif
+]])
 
-            require("indent_blankline").setup {}
+require("indent_blankline").setup {}
 
-            require('guess-indent').setup {}
+require('guess-indent').setup {}
 
-            require('aerial').setup({
-                -- optionally use on_attach to set keymaps when aerial has attached to a buffer
-                on_attach = function(bufnr)
-                    -- Jump forwards/backwards with '{' and '}'
-                    vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
-                    vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
-                end
-            })
-            -- You probably also want to set a keymap to toggle aerial
-            vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
+require('aerial').setup({
+    -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+    on_attach = function(bufnr)
+        -- Jump forwards/backwards with '{' and '}'
+        vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', {buffer = bufnr})
+        vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', {buffer = bufnr})
+    end
+})
+-- You probably also want to set a keymap to toggle aerial
+vim.keymap.set('n', '<leader>a', '<cmd>AerialToggle!<CR>')
 
-            require'treesitter-context'.setup{
-                enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-                max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-                min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-                line_numbers = true,
-                multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
-                trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-                mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
-                -- Separator between context and content. Should be a single character string, like '-'.
-                -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-                separator = nil,
-                zindex = 20, -- The Z-index of the context window
-            }
-            vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
+require'treesitter-context'.setup{
+    enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+    max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
+    min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+    line_numbers = true,
+    multiline_threshold = 20, -- Maximum number of lines to collapse for a single context line
+    trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+    mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
+    -- Separator between context and content. Should be a single character string, like '-'.
+    -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+    separator = nil,
+    zindex = 20, -- The Z-index of the context window
+}
+vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
-            vim.cmd([[
-            let g:copilot_proxy = getenv('http_proxy')
-            imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
-            let g:copilot_no_tab_map = v:true
-            ]])
+vim.cmd([[
+let g:copilot_proxy = getenv('http_proxy')
+imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
+let g:copilot_no_tab_map = v:true
+]])
 
-            -- default configuration
-            require('illuminate').configure({
-                -- delay = 0,
-            })
+-- default configuration
+require('illuminate').configure({
+    -- delay = 0,
+})
 

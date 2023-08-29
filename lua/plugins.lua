@@ -68,6 +68,13 @@ packer.startup({
         use 'ojroques/nvim-osc52'
         use 'Pocco81/auto-save.nvim'
         use 'airblade/vim-gitgutter'
+        use {
+            'NeogitOrg/neogit',
+            requires = {
+                'nvim-lua/plenary.nvim',
+                'sindrets/diffview.nvim'
+            }
+        }
         -- use 'preservim/nerdcommenter'
         use {
             'numToStr/Comment.nvim',
@@ -281,6 +288,8 @@ require'auto-save'.setup{}
 map('n', ']h', '<Plug>(GitGutterNextHunk)', opt)
 map('n', '[h', '<Plug>(GitGutterPrevHunk)', opt)
 vim.cmd([[command U GitGutterUndoHunk]])
+
+require('neogit').setup{}
 
 vim.cmd([[
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']

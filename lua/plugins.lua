@@ -127,6 +127,8 @@ packer.startup({
                 }
             end
         }
+
+        use 'mfussenegger/nvim-dap'
     end
 })
 
@@ -262,7 +264,7 @@ vim.keymap.set('n', '<leader>rs', fzf.resume)
 vim.keymap.set('n', '<leader>tt', fzf.tags)
 vim.keymap.set('n', '<leader>tb', fzf.btags)
 vim.keymap.set('n', '<leader>tl', fzf.tags_live_grep)
-vim.keymap.set('n', '<leader>bt', fzf.tags_grep_cword)
+vim.keymap.set('n', '<leader>gt', fzf.tags_grep_cword)
 vim.keymap.set('n', '<leader>bb', fzf.buffers)
 vim.keymap.set('n', '<leader>er', fzf.lsp_references)
 vim.keymap.set('n', '<leader>ed', fzf.lsp_definitions)

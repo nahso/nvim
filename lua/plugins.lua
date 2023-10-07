@@ -128,7 +128,11 @@ packer.startup({
             end
         }
 
-        use 'mfussenegger/nvim-dap'
+        use({
+            "iamcco/markdown-preview.nvim",
+            run = function() vim.fn["mkdp#util#install"]() end,
+        })
+        use 'TobinPalmer/pastify.nvim'
     end
 })
 
@@ -318,7 +322,7 @@ if executable('rg')
 endif
 ]])
 
-require("indent_blankline").setup {}
+require("ibl").setup {}
 
 require('guess-indent').setup {}
 
@@ -358,4 +362,18 @@ let g:copilot_no_tab_map = v:true
 require('illuminate').configure({
     -- delay = 0,
 })
+
+require('pastify').setup {
+    opts = {
+        absolute_path = false, -- use absolute or relative path to the working directory
+        apikey = '', -- Api key, required for online saving
+        local_path = '/assets/', -- The path to put local files in, ex ~/Projects/<name>/assets/images/<imgname>.png
+        save = 'local', -- Either 'local' or 'online'
+    },
+    ft = { -- Custom snippets for different filetypes, will replace $IMG$ with the image url
+    html = '<img src="$IMG$" alt="">',
+    markdown = '![]($IMG$)',
+    tex = [[\includegraphics[width=\linewidth]{$IMG$}]],
+    },
+}
 

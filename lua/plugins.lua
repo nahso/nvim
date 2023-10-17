@@ -258,6 +258,12 @@ fzf.setup{
             vertical = 'down:30%',
             layout = 'vertical'
         },
+    },
+    commands = {
+        actions = {
+            ['default'] = require'fzf-lua'.actions.ex_run_cr,
+            ['ctrl-y'] = require'fzf-lua'.actions.ex_run,
+        }
     }
 }
 

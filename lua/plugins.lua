@@ -2,6 +2,8 @@
 local map = vim.api.nvim_set_keymap
 local opt = {noremap = true, silent = true }
 
+local disable_extra_plugin = os.getenv("DISABLE_NVIM_EXTRA_PLUGIN") == '1'
+
 local fn = vim.fn
 local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 local paccker_bootstrap
@@ -131,8 +133,9 @@ packer.startup({
         use({
             "iamcco/markdown-preview.nvim",
             run = function() vim.fn["mkdp#util#install"]() end,
+            cond = disable_extra_plugin
         })
-        use 'TobinPalmer/pastify.nvim'
+        use ({'TobinPalmer/pastify.nvim', cond = disable_extra_plugin})
     end
 })
 
@@ -374,17 +377,18 @@ require('illuminate').configure({
     -- delay = 0,
 })
 
-require('pastify').setup {
-    opts = {
-        absolute_path = false, -- use absolute or relative path to the working directory
-        apikey = '', -- Api key, required for online saving
-        local_path = '/assets/', -- The path to put local files in, ex ~/Projects/<name>/assets/images/<imgname>.png
-        save = 'local', -- Either 'local' or 'online'
-    },
-    ft = { -- Custom snippets for different filetypes, will replace $IMG$ with the image url
-    html = '<img src="$IMG$" alt="">',
-    markdown = '![]($IMG$)',
-    tex = [[\includegraphics[width=\linewidth]{$IMG$}]],
-    },
-}
-
+if not disable_extra_plugin then
+    require('pastify').setup {
+        opts = {
+            absolute_path = false, -- use absolute or relative path to the working directory
+            apikey = '', -- Api key, required for online saving
+            local_path = '/assets/', -- The path to put local files in, ex ~/Projects/<name>/assets/images/<imgname>.png
+            save = 'local', -- Either 'local' or 'online'
+        },
+        ft = { -- Custom snippets for different filetypes, will replace $IMG$ with the image url
+        html = '<img src="$IMG$" alt="">',
+        markdown = '![]($IMG$)',
+        tex = [[\includegraphics[width=\linewidth]{$IMG$}]],
+        },
+    }
+end

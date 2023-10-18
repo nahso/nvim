@@ -130,6 +130,8 @@ packer.startup({
             end
         }
 
+        use 'sbdchd/neoformat'
+
         use({
             "iamcco/markdown-preview.nvim",
             run = function() vim.fn["mkdp#util#install"]() end,
@@ -392,3 +394,12 @@ if not disable_extra_plugin then
         },
     }
 end
+
+vim.cmd([[
+let g:neoformat_c_clangformat = {
+      \ 'exe': 'clang-format',
+      \ 'args': ['-style=file'],
+      \ }
+let g:neoformat_enabled_cpp = ['clangformat']
+let g:neoformat_enabled_c = ['clangformat']
+]])

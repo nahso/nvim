@@ -32,6 +32,8 @@ if not status_ok then
     return
 end
 
+local load_extra_package = os.getenv('DISABLE_NVIM_EXTRA_PLUGIN') ~= '1'
+
 packer.startup({
     function(use)
         use "wbthomason/packer.nvim"
@@ -42,7 +44,11 @@ packer.startup({
         use "phaazon/hop.nvim"
         use "windwp/nvim-autopairs"
         use "ethanholz/nvim-lastplace"
-        use "neovim/nvim-lspconfig"
+        use {
+            "williamboman/mason.nvim",
+            "williamboman/mason-lspconfig.nvim",
+            "neovim/nvim-lspconfig",
+        }
 
         use 'hrsh7th/cmp-nvim-lsp'
         use 'hrsh7th/cmp-buffer'
@@ -138,6 +144,10 @@ packer.startup({
         }
 
         use 'sbdchd/neoformat'
+        use {
+            'LunarVim/bigfile.nvim',
+            config = function () require('bigfile').setup() end
+        }
         
         if load_extra_package then
             use({
@@ -176,6 +186,8 @@ require('nvim-lastplace').setup({
     lastplace_open_folds = true
 })
 
+require("mason").setup()
+require("mason-lspconfig").setup()
 require'lspconfig'.pyright.setup{}
 
 local cmp_nvim_lsp = require "cmp_nvim_lsp"
@@ -234,9 +246,34 @@ cmp.setup({
 })
 
 require("nvim-treesitter.install").prefer_git = true
+local parsers = require("nvim-treesitter.parsers").get_parser_configs()
+for _, p in pairs(parsers) do
+    p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")
+end
 require'nvim-treesitter.configs'.setup {
     -- A list of parser names, or "all" (the five listed parsers should always be installed)
-    ensure_installed = { "c", "lua", "vim", "vimdoc", "query" },
+    ensure_installed = {
+        "bash",
+        "c",
+        "cpp",
+        "css",
+        "go",
+        "gomod",
+        "html",
+        "javascript",
+        "json",
+        "latex",
+        "lua",
+        "make",
+        "markdown",
+        "markdown_inline",
+        "python",
+        "rust",
+        "typescript",
+        "vimdoc",
+        "vue",
+        "yaml",
+    },
 
     -- Install parsers synchronously (only applied to `ensure_installed`)
     sync_install = false,

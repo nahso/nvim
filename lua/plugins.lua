@@ -245,7 +245,9 @@ cmp.setup({
     })
 })
 
-require("nvim-treesitter.install").prefer_git = true
+local ts_install = require("nvim-treesitter.install")
+ts_install.prefer_git = true
+ts_install.compilers = {'gcc', 'clang'}
 local parsers = require("nvim-treesitter.parsers").get_parser_configs()
 for _, p in pairs(parsers) do
     p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")

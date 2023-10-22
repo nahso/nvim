@@ -43,7 +43,7 @@ vim.o.swapfile = false
 
 vim.o.updatetime = 300
 
-vim.o.timeoutlen = 0
+vim.o.timeoutlen = 200
 vim.o.timeout = false
 vim.o.ttimeout = false
 

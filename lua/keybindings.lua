@@ -18,7 +18,6 @@ map("v", "<leader>y", '"+y', opt)
 map("v", "<leader>p", '"+p', opt)
 map("v", "//", "y/\\V<C-R>=escape(@\",'/\\')<CR><CR>", opt)
 
-map("i", "jk", "<esc>", opt)
 map("i", "<c-f>", "<right>", opt)
 map("i", "<c-b>", "<left>", opt)
 map("i", "<c-g>", "<esc>", opt)

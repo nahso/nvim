@@ -2,8 +2,6 @@
 local map = vim.api.nvim_set_keymap
 local opt = {noremap = true, silent = true }
 
-local disable_extra_plugin = os.getenv("DISABLE_NVIM_EXTRA_PLUGIN") == '1'
-
 local fn = vim.fn
 local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 local paccker_bootstrap
@@ -55,6 +53,12 @@ packer.startup({
             -- install jsregexp (optional!:).
             run = "make install_jsregexp"
         })
+        use {
+            "max397574/better-escape.nvim",
+            config = function()
+                require("better_escape").setup()
+            end,
+        }
 
         use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
         use({
@@ -86,7 +90,10 @@ packer.startup({
         }
         use 'ludovicchabant/vim-gutentags'
         use 'djoshea/vim-autoread'
-        use "lukas-reineke/indent-blankline.nvim"
+        use {
+            "lukas-reineke/indent-blankline.nvim",
+            commit = "9637670"
+        }
         use "NMAC427/guess-indent.nvim"
 
         use {
@@ -131,13 +138,20 @@ packer.startup({
         }
 
         use 'sbdchd/neoformat'
-
-        use({
-            "iamcco/markdown-preview.nvim",
-            run = function() vim.fn["mkdp#util#install"]() end,
-            cond = disable_extra_plugin
-        })
-        use ({'TobinPalmer/pastify.nvim', cond = disable_extra_plugin})
+        
+        if load_extra_package then
+            use({
+                "iamcco/markdown-preview.nvim",
+                run = function() vim.fn["mkdp#util#install"]() end,
+            })
+            use ({
+                'TobinPalmer/pastify.nvim',
+            })
+        end
+        
+        if packer_bootstrap then
+            require('packer').sync()
+        end
     end
 })
 
@@ -333,12 +347,7 @@ if executable('rg')
 endif
 ]])
 
-require("ibl").setup({
-  scope = {
-    show_start = false,
-    show_end = false,
-  }
-})
+require("indent_blankline").setup({})
 
 require('guess-indent').setup {}
 
@@ -377,9 +386,10 @@ let g:copilot_no_tab_map = v:true
 -- default configuration
 require('illuminate').configure({
     -- delay = 0,
+    under_cursor = false,
 })
 
-if not disable_extra_plugin then
+if load_extra_package then
     require('pastify').setup {
         opts = {
             absolute_path = false, -- use absolute or relative path to the working directory
@@ -391,7 +401,7 @@ if not disable_extra_plugin then
         html = '<img src="$IMG$" alt="">',
         markdown = '![]($IMG$)',
         tex = [[\includegraphics[width=\linewidth]{$IMG$}]],
-        },
+    },
     }
 end
 

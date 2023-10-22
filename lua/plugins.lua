@@ -258,11 +258,6 @@ require'nvim-treesitter.configs'.setup {
         "bash",
         "c",
         "cpp",
-        "css",
-        "go",
-        "gomod",
-        "html",
-        "javascript",
         "json",
         "latex",
         "lua",
@@ -270,11 +265,9 @@ require'nvim-treesitter.configs'.setup {
         "markdown",
         "markdown_inline",
         "python",
-        "rust",
-        "typescript",
         "vimdoc",
-        "vue",
         "yaml",
+        "cuda"
     },
 
     -- Install parsers synchronously (only applied to `ensure_installed`)

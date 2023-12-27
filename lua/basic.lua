@@ -76,3 +76,5 @@ vim.g.loaded_netrwPlugin = 1
 
 -- set termguicolors to enable highlight groups
 vim.opt.termguicolors = true
+
+vim.cmd([[au BufEnter * set noro]])

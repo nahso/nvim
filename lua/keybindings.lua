@@ -23,3 +23,8 @@ map("i", "<c-b>", "<left>", opt)
 map("i", "<c-g>", "<esc>", opt)
 
 map("t", "<A-i>", "<C-\\><C-n>", opt)
+
+map("n", "<A-[>", "<c-w><", opt)
+map("n", "<A-]>", "<c-w>>", opt)
+map("i", "<A-[>", "<c-w><", opt)
+map("i", "<A-]>", "<c-w>>", opt)

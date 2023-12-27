@@ -304,7 +304,7 @@ require'nvim-treesitter.configs'.setup {
 local fzf = require('fzf-lua')
 fzf.setup{
     winopts = {
-        fullscreen = true,
+        fullscreen = false,
         preview = {
             vertical = 'down:30%',
             layout = 'vertical'

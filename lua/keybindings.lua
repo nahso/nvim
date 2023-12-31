@@ -28,3 +28,5 @@ map("n", "<A-[>", "<c-w><", opt)
 map("n", "<A-]>", "<c-w>>", opt)
 map("i", "<A-[>", "<c-w><", opt)
 map("i", "<A-]>", "<c-w>>", opt)
+
+map("n", "<c-q>", ":qa<cr>", opt)

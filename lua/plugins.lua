@@ -62,18 +62,15 @@ packer.startup({
         use {
             "max397574/better-escape.nvim",
             config = function()
-                require("better_escape").setup()
+                require("better_escape").setup {mapping = {"jk"}}
+                
             end,
         }
 
         use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
-        use({
-            "nvim-treesitter/nvim-treesitter-textobjects",
-            after = "nvim-treesitter",
-            requires = "nvim-treesitter/nvim-treesitter",
-        })
         use 'nvim-treesitter/nvim-treesitter-context'
         use 'wellle/targets.vim'
+        use 'gaving/vim-textobj-argument'
 
         use 'nvim-tree/nvim-web-devicons'
         use 'ibhagwan/fzf-lua'
@@ -122,26 +119,7 @@ packer.startup({
         use 'github/copilot.vim'
 
         use 'lambdalisue/suda.vim'
-
-        use {
-            "klen/nvim-config-local",
-            config = function()
-                require('config-local').setup {
-                    -- Default options (optional)
-
-                    -- Config file patterns to load (lua supported)
-                    config_files = { ".nvim.lua", ".nvimrc", ".exrc" },
-
-                    -- Where the plugin keeps files data
-                    hashfile = vim.fn.stdpath("data") .. "/config-local",
-
-                    autocommands_create = true, -- Create autocommands (VimEnter, DirectoryChanged)
-                    commands_create = true,     -- Create commands (ConfigLocalSource, ConfigLocalEdit, ConfigLocalTrust, ConfigLocalIgnore)
-                    silent = false,             -- Disable plugin messages (Config loaded/ignored)
-                    lookup_parents = false,     -- Lookup config files in parent directories
-                }
-            end
-        }
+        use 'AndrewRadev/linediff.vim'
 
         use 'sbdchd/neoformat'
         use {
@@ -165,7 +143,15 @@ packer.startup({
     end
 })
 
-
+require("tokyonight").setup({
+    style = "night",
+    styles = {
+        comments = { italic = false },
+    },
+    on_colors = function(colors)
+        colors.comment = "#6a9955"
+    end,
+})
 vim.cmd([[colorscheme tokyonight]])
 -- vim.cmd([[colorscheme doom-one]])
 
@@ -280,24 +266,6 @@ require'nvim-treesitter.configs'.setup {
     highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
-    },
-    textobjects = {
-        select = {
-            enable = true,
-            -- Automatically jump forward to textobj, similar to targets.vim
-            lookahead = true,
-            keymaps = {
-                ["af"] = "@function.outer",
-                ["if"] = "@function.inner",
-                ["ac"] = "@class.outer",
-                ["ic"] = "@class.inner",
-            },
-            selection_modes = {
-                ['@parameter.outer'] = 'v', -- charwise
-                ['@function.outer'] = 'V', -- linewise
-                ['@class.outer'] = '<c-v>', -- blockwise
-            },
-        },
     },
 }
 

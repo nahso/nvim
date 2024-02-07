@@ -30,3 +30,5 @@ map("i", "<A-[>", "<c-w><", opt)
 map("i", "<A-]>", "<c-w>>", opt)
 
 map("n", "<leader>q", ":qa!<cr>", opt)
+
+vim.cmd([[command D windo diffthis]])

@@ -1,7 +1,5 @@
 vim.g.encoding = "UTF-8"
-vim.o.fileencoding = 'utf-8'
-
-
+vim.o.fileencoding = "utf-8"
 
 vim.o.scrolloff = 5
 vim.o.sidescrolloff = 5
@@ -59,7 +57,7 @@ vim.env.NVIM_TUI_ENABLE_TRUE_COLOR = 1
 
 vim.o.wildmenu = true
 
-vim.o.shortmess = vim.o.shortmess .. 'c'
+vim.o.shortmess = vim.o.shortmess .. "c"
 
 vim.o.pumheight = 10
 

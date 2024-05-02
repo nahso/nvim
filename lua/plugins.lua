@@ -126,6 +126,14 @@ packer.startup({
             'LunarVim/bigfile.nvim',
             config = function () require('bigfile').setup() end
         }
+        use {
+            'kenn7/vim-arsync',
+            requires = {
+                {'prabirshrestha/async.vim'}
+            },
+        }
+        use 'wsdjeg/vim-fetch' -- open and jump to file:line
+        use 'godlygeek/tabular'
         
         if load_extra_package then
             use({

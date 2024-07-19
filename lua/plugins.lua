@@ -137,6 +137,7 @@ packer.startup({
 		})
 		use("wsdjeg/vim-fetch") -- open and jump to file:line
 		use("godlygeek/tabular")
+  	    use "lervag/vimtex"
 
 		if load_extra_package then
 			use({
@@ -148,7 +149,7 @@ packer.startup({
 			use({
 				"TobinPalmer/pastify.nvim",
 			})
-		end
+    	end
 
 		if packer_bootstrap then
 			require("packer").sync()
@@ -188,6 +189,7 @@ require("nvim-lastplace").setup({
 require("mason").setup()
 require("mason-lspconfig").setup()
 require("lspconfig").pyright.setup({})
+-- require("lspconfig").ltex.setup({})
 
 local cmp_nvim_lsp = require("cmp_nvim_lsp")
 require("lspconfig").clangd.setup({
@@ -258,7 +260,6 @@ require("nvim-treesitter.configs").setup({
 		"c",
 		"cpp",
 		"json",
-		"latex",
 		"lua",
 		"make",
 		"markdown",
@@ -268,6 +269,7 @@ require("nvim-treesitter.configs").setup({
 		"yaml",
 		"cuda",
 	},
+	disable = {"latex"},
 
 	-- Install parsers synchronously (only applied to `ensure_installed`)
 	sync_install = false,

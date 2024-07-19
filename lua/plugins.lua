@@ -130,7 +130,7 @@ packer.startup({
 			end,
 		})
 		use({
-			"kenn7/vim-arsync",
+			"nahso/vim-arsync",
 			requires = {
 				{ "prabirshrestha/async.vim" },
 			},

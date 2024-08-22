@@ -54,6 +54,9 @@ packer.startup({
 		use("hrsh7th/cmp-buffer")
 		use("hrsh7th/nvim-cmp")
 
+		use("dense-analysis/ale")
+		use("folke/trouble.nvim")
+
 		use({
 			"L3MON4D3/LuaSnip",
 			-- install jsregexp (optional!:).
@@ -204,6 +207,12 @@ require("lspconfig").clangd.setup({
 		"--enable-config"
 	},
 })
+
+vim.cmd([[
+let g:ale_disable_lsp = 1
+]])
+
+require("trouble").setup({})
 
 -- vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
 -- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead

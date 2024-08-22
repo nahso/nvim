@@ -92,10 +92,10 @@ packer.startup({
 		})
 		use("ludovicchabant/vim-gutentags")
 		use("djoshea/vim-autoread")
-		use({
-			"lukas-reineke/indent-blankline.nvim",
-			commit = "9637670",
-		})
+		-- use({
+		-- 	"lukas-reineke/indent-blankline.nvim",
+		-- })
+		use("Yggdroot/indentLine")
 		use("NMAC427/guess-indent.nvim")
 
 		use({
@@ -198,6 +198,13 @@ require("lspconfig").clangd.setup({
 	cmd = {
 		"clangd",
 		"--offset-encoding=utf-16",
+		"--background-index",
+		"--suggest-missing-includes",
+		"--clang-tidy",
+		"--limit-references=0",
+		"--limit-results=0",
+		"-j=8",
+		"--enable-config"
 	},
 })
 
@@ -362,7 +369,10 @@ if executable('rg')
 endif
 ]])
 
-require("indent_blankline").setup({})
+-- require("ibl").setup()
+vim.cmd([[
+let g:indentLine_enabled = 1
+]])
 
 require("guess-indent").setup({})
 

@@ -29,6 +29,19 @@ map("n", "<A-]>", "<c-w>>", opt)
 map("i", "<A-[>", "<c-w><", opt)
 map("i", "<A-]>", "<c-w>>", opt)
 
+vim.cmd([[
+" see: https://vi.stackexchange.com/questions/2350/how-to-map-alt-key
+execute "set <M-j>=\ej"
+execute "set <M-k>=\ek"
+execute "set <M-h>=\eh"
+execute "set <M-l>=\el"
+
+nnoremap <M-j> <C-w>j
+nnoremap <M-k> <C-w>k
+nnoremap <M-h> <C-w>h
+nnoremap <M-l> <C-w>l
+]])
+
 map("n", "<leader>q", ":qa!<cr>", opt)
 
 vim.cmd([[command D windo diffthis]])

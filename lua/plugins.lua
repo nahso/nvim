@@ -200,9 +200,6 @@ require("lspconfig").clangd.setup({
 		"--offset-encoding=utf-16",
 		"--background-index",
 		"--suggest-missing-includes",
-		"--clang-tidy",
-		"--limit-references=0",
-		"--limit-results=0",
 		"-j=8",
 		"--enable-config"
 	},

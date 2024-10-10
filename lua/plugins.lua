@@ -39,7 +39,6 @@ packer.startup({
     use("wbthomason/packer.nvim")
     use("folke/tokyonight.nvim")
     use("NTBBloodbath/doom-one.nvim")
-    use("vim-airline/vim-airline")
 
     use("kylechui/nvim-surround")
     use("phaazon/hop.nvim")

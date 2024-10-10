@@ -102,7 +102,7 @@ packer.startup({
 		use("NMAC427/guess-indent.nvim")
 
 		use({
-			"nvim-tree/nvim-tree.lua",
+			"nahso/nvim-tree.lua",
 			requires = {
 				"nvim-tree/nvim-web-devicons", -- optional
 			},

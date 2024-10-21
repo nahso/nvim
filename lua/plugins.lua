@@ -444,3 +444,12 @@ let g:neoformat_c_clangformat = {
 let g:neoformat_enabled_cpp = ['clangformat']
 let g:neoformat_enabled_c = ['clangformat']
 ]])
+
+-- the conceallevel should be set to 0 by default, but we should explicitly set it to 0 for markdown filetype
+vim.cmd([[
+function! SetConcealLevel()
+    set conceallevel=0
+endfunction
+
+autocmd FileType markdown call timer_start(500, {-> SetConcealLevel()})
+]])

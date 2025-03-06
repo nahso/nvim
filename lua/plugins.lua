@@ -62,12 +62,7 @@ packer.startup({
       -- install jsregexp (optional!:).
       run = "make install_jsregexp",
     })
-    use({
-      "max397574/better-escape.nvim",
-      config = function()
-        require("better_escape").setup({ mapping = { "jk" } })
-      end,
-    })
+    use("max397574/better-escape.nvim")
 
     use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
     use("nvim-treesitter/nvim-treesitter-context")
@@ -171,6 +166,9 @@ require("tokyonight").setup({
 })
 vim.cmd([[colorscheme tokyonight]])
 -- vim.cmd([[colorscheme doom-one]])
+vim.cmd([[
+highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
+]])
 
 require("nvim-surround").setup()
 
@@ -258,6 +256,13 @@ cmp.setup({
     { name = "buffer" },
   }),
 })
+
+require("better_escape").setup {
+  default_mappings = false,
+  mappings = {
+    i = { j = { k = "<Esc>" }}
+  }
+}
 
 local ts_install = require("nvim-treesitter.install")
 ts_install.prefer_git = true

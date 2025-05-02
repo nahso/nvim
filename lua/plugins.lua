@@ -1,158 +1,75 @@
--- ~/.local/share/nvim/site/pack/packer/
-local map = vim.api.nvim_set_keymap
-local opt = { noremap = true, silent = true }
-
-local fn = vim.fn
-local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-local paccker_bootstrap
-if fn.empty(fn.glob(install_path)) > 0 then
-  vim.notify("installing packer.nvim")
-  paccker_bootstrap = fn.system({
-    "git",
-    "clone",
-    "--depth",
-    "1",
-    "https://github.com/wbthomason/packer.nvim",
-    -- "https://gitcode.net/mirrors/wbthomason/packer.nvim",
-    install_path,
-  })
-
-  -- https://github.com/wbthomason/packer.nvim/issues/750
-  local rtp_addition = vim.fn.stdpath("data") .. "/site/pack/*/start/*"
-  if not string.find(vim.o.runtimepath, rtp_addition) then
-    vim.o.runtimepath = rtp_addition .. "," .. vim.o.runtimepath
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+  if vim.v.shell_error ~= 0 then
+    vim.api.nvim_echo({
+      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+      { out, "WarningMsg" },
+      { "\nPress any key to exit..." },
+    }, true, {})
+    vim.fn.getchar()
+    os.exit(1)
   end
-  vim.notify("finished.")
 end
+vim.opt.rtp:prepend(lazypath)
 
--- Use a protected call so we don't error out on first use
-local status_ok, packer = pcall(require, "packer")
-if not status_ok then
-  vim.notify("can't find packer.nvim, aborted")
-  return
-end
+-- Make sure to setup `mapleader` and `maplocalleader` before
+-- loading lazy.nvim so that mappings are correct.
+-- This is also a good place to setup other settings (vim.opt)
+vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
 
-local load_extra_package = os.getenv("DISABLE_NVIM_EXTRA_PLUGIN") ~= "1"
+-- Setup lazy.nvim
+require("lazy").setup({
+  spec = {
+    "folke/tokyonight.nvim",
+    "nvim-tree/nvim-web-devicons",
 
-packer.startup({
-  function(use)
-    use("wbthomason/packer.nvim")
-    use("folke/tokyonight.nvim")
-    use("NTBBloodbath/doom-one.nvim")
+    "kylechui/nvim-surround",
+    "phaazon/hop.nvim", -- 's' jump
+    "windwp/nvim-autopairs",
+    "farmergreg/vim-lastplace",
+    "max397574/better-escape.nvim",
+    "lewis6991/gitsigns.nvim",
+    "Pocco81/auto-save.nvim",
+    "ibhagwan/fzf-lua",
+    "ojroques/nvim-osc52",
+    "LunarVim/bigfile.nvim",
+    "wsdjeg/vim-fetch",  -- open and jump to file:line
+    "godlygeek/tabular",
+    "djoshea/vim-autoread",
+    "numToStr/Comment.nvim",
+    "wellle/targets.vim", -- text objects
+    "folke/which-key.nvim",
+    "RRethy/vim-illuminate",
 
-    use("kylechui/nvim-surround")
-    use("phaazon/hop.nvim")
-    use("windwp/nvim-autopairs")
-    use("ethanholz/nvim-lastplace")
-    use({
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-      "neovim/nvim-lspconfig",
-    })
+    "stevearc/conform.nvim",
+    "mfussenegger/nvim-lint",
 
-    use("hrsh7th/cmp-nvim-lsp")
-    use("hrsh7th/cmp-buffer")
-    use("hrsh7th/nvim-cmp")
+    "neovim/nvim-lspconfig",
+    "hrsh7th/cmp-nvim-lsp",
+    "hrsh7th/cmp-buffer",
+    "hrsh7th/nvim-cmp",
 
-    use("dense-analysis/ale")
-    use("folke/trouble.nvim")
+    "folke/trouble.nvim",
+    {
+      "nvim-treesitter/nvim-treesitter",
+      build = ":TSUpdate",
+    },
+    "nvim-treesitter/nvim-treesitter-context",
+    "ludovicchabant/vim-gutentags",
+    "Yggdroot/indentLine",
+    "NMAC427/guess-indent.nvim",
 
-    use({
-      "L3MON4D3/LuaSnip",
-      -- install jsregexp (optional!:).
-      run = "make install_jsregexp",
-    })
-    use("max397574/better-escape.nvim")
-
-    use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-    use("nvim-treesitter/nvim-treesitter-context")
-    use("wellle/targets.vim")
-    use("gaving/vim-textobj-argument")
-
-    use("nvim-tree/nvim-web-devicons")
-    use("ibhagwan/fzf-lua")
-    use("ojroques/nvim-osc52")
-    use("Pocco81/auto-save.nvim")
-    use("airblade/vim-gitgutter")
-    use({
-      "NeogitOrg/neogit",
-      requires = {
-        "nvim-lua/plenary.nvim",
-        "sindrets/diffview.nvim",
-      },
-    })
-    -- use 'preservim/nerdcommenter'
-    use({
-      "numToStr/Comment.nvim",
-      config = function()
-        require("Comment").setup()
-      end,
-    })
-    use("ludovicchabant/vim-gutentags")
-    use("djoshea/vim-autoread")
-    -- use({
-    -- 	"lukas-reineke/indent-blankline.nvim",
-    -- })
-    use("Yggdroot/indentLine")
-    use("NMAC427/guess-indent.nvim")
-
-    use({
-      "nahso/nvim-tree.lua",
-      requires = {
-        "nvim-tree/nvim-web-devicons", -- optional
-      },
-      config = function()
-        require("nvim-tree").setup({})
-      end,
-    })
-
-    use({
-      "stevearc/aerial.nvim",
-      config = function()
-        require("aerial").setup()
-      end,
-    })
-
-    use("RRethy/vim-illuminate")
-
-    use("github/copilot.vim")
-
-    use("lambdalisue/suda.vim")
-    use("AndrewRadev/linediff.vim")
-
-    use("sbdchd/neoformat")
-    use({
-      "LunarVim/bigfile.nvim",
-      config = function()
-        require("bigfile").setup()
-      end,
-    })
-    use({
-      "nahso/vim-arsync",
-      requires = {
-        { "prabirshrestha/async.vim" },
-      },
-    })
-    use("wsdjeg/vim-fetch") -- open and jump to file:line
-    use("godlygeek/tabular")
-    use("lervag/vimtex")
-
-    if load_extra_package then
-      use({
-        "iamcco/markdown-preview.nvim",
-        run = function()
-          vim.fn["mkdp#util#install"]()
-        end,
-      })
-      use({
-        "TobinPalmer/pastify.nvim",
-      })
-    end
-
-    if packer_bootstrap then
-      require("packer").sync()
-    end
-  end,
+    "github/copilot.vim",
+    {
+      "nvim-tree/nvim-tree.lua",
+      dependencies = { "nvim-tree/nvim-web-devicons" },
+    },
+    { "nahso/rsync-build.nvim" }
+  },
 })
 
 require("tokyonight").setup({
@@ -164,9 +81,8 @@ require("tokyonight").setup({
     colors.comment = "#6a9955"
   end,
 })
-vim.cmd([[colorscheme tokyonight]])
--- vim.cmd([[colorscheme doom-one]])
 vim.cmd([[
+colorscheme tokyonight
 highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
 ]])
 
@@ -180,19 +96,46 @@ vim.keymap.set("n", "s", require("hop").hint_char2)
 vim.keymap.set("v", "s", require("hop").hint_char2)
 
 require("nvim-autopairs").setup()
-
-require("nvim-lastplace").setup({
-  lastplace_ignore_buftype = { "quickfix", "nofile", "help" },
-  lastplace_ignore_filetype = { "gitcommit", "gitrebase", "svn", "hgcommit" },
-  lastplace_open_folds = true,
+require("Comment").setup()
+require("which-key").setup({
+  delay = 2000,
 })
 
-require("mason").setup()
-require("mason-lspconfig").setup()
-require("lspconfig").pyright.setup({})
--- require("lspconfig").ltex.setup({})
+require("conform").setup({
+  formatters_by_ft = {
+    c = { "clang-format" },
+    cpp = { "clang-format" },
+    python = { "black", "isort" },
+    lua = { "stylua" },
+  },
+  default_format_opts = {
+    async = false,
+    quiet = false,
+  }
+})
+vim.keymap.set("n", "<leader>8", function()
+  require("conform").format()
+end, { desc = "Format buffer" })
+vim.keymap.set("v", "<leader>8", function()
+  require("conform").format()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+end, { desc = "Format selection" })
+
+require("lint").linters_by_ft = {
+  python = { "flake8", "mypy" },
+  cpp = { "clangtidy" },
+  c = { "clangtidy" },
+}
+require("lint").linters.clangtidy.args = {
+  "--config-file=~/.clang-tidy"
+}
+vim.cmd([[
+au BufWritePost * lua require('lint').try_lint()
+au BufReadPost * lua require('lint').try_lint()
+]])
 
 local cmp_nvim_lsp = require("cmp_nvim_lsp")
+require("lspconfig").basedpyright.setup({})
 require("lspconfig").clangd.setup({
   on_attach = on_attach,
   capabilities = cmp_nvim_lsp.default_capabilities(),
@@ -206,27 +149,17 @@ require("lspconfig").clangd.setup({
   },
 })
 
-vim.cmd([[
-let g:ale_disable_lsp = 1
-]])
-
-require("trouble").setup({})
-
--- vim.keymap.set("n", "<leader>ed", vim.lsp.buf.definition)
--- vim.keymap.set("n", "<leader>er", vim.lsp.buf.references) -- use fzf version instead
-vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename)
-vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action)
-vim.keymap.set("n", "[d", vim.diagnostic.goto_prev)
-vim.keymap.set("n", "]d", vim.diagnostic.goto_next)
+vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
+vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
+vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
 
 local has_words_before = function()
   unpack = unpack or table.unpack
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
-
 local cmp = require("cmp")
-local luasnip = require("luasnip")
 cmp.setup({
   window = {
     documentation = cmp.config.window.bordered(),
@@ -240,15 +173,12 @@ cmp.setup({
     ["<Tab>"] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
       elseif has_words_before() then
         cmp.complete()
       else
         fallback()
       end
     end, { "i", "s" }),
-    -- ['<Tab>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
   }),
   sources = cmp.config.sources({
     { name = "nvim_lsp" },
@@ -257,12 +187,61 @@ cmp.setup({
   }),
 })
 
+require("trouble").setup({})
 require("better_escape").setup {
   default_mappings = false,
   mappings = {
     i = { j = { k = "<Esc>" }}
   }
 }
+
+require('gitsigns').setup({
+  signs = {
+    add          = { text = '+' },
+    change       = { text = '=' },
+    delete       = { text = '_' },
+    topdelete    = { text = '‾' },
+    changedelete = { text = '~' },
+    untracked    = { text = '┆' },
+  },
+  signs_staged = {
+    add          = { text = '|+' },
+    change       = { text = '|=' },
+    delete       = { text = '|_' },
+    topdelete    = { text = '|‾' },
+    changedelete = { text = '|~' },
+    untracked    = { text = '|┆' }, 
+  },
+})
+local gitsigns = require('gitsigns')
+vim.keymap.set('n', '[h', function()
+  if vim.wo.diff then
+    vim.cmd.normal({'[h', bang = true})
+  else
+    gitsigns.nav_hunk('prev')
+  end
+end, { desc = "Prev hunk" })
+vim.keymap.set('n', ']h', function()
+  if vim.wo.diff then
+    vim.cmd.normal({']h', bang = true})
+  else
+    gitsigns.nav_hunk('next')
+  end
+end, { desc = "Next hunk" })
+vim.keymap.set('n', '<leader>hs', gitsigns.stage_hunk, { desc = "Stage hunk" })
+vim.keymap.set('n', '<leader>hr', gitsigns.reset_hunk, { desc = "Reset hunk" })
+vim.keymap.set('v', '<leader>hs', function()
+  gitsigns.stage_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+end, { desc = "Stage hunk" })
+vim.keymap.set('v', '<leader>hr', function()
+  gitsigns.reset_hunk({ vim.fn.line('.'), vim.fn.line('v') })
+end, { desc = "Reset hunk" })
+vim.keymap.set('n', '<leader>hS', gitsigns.stage_buffer, { desc = "Stage buffer" })
+-- vim.keymap.set('n', '<leader>hR', gitsigns.reset_buffer, { desc = "Reset buffer" })
+vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk, { desc = "Preview hunk" })
+vim.keymap.set('n', '<leader>hi', gitsigns.preview_hunk_inline, { desc = "Preview hunk inline" })
+
+require("auto-save").setup({})
 
 local ts_install = require("nvim-treesitter.install")
 ts_install.prefer_git = true
@@ -271,8 +250,14 @@ local parsers = require("nvim-treesitter.parsers").get_parser_configs()
 for _, p in pairs(parsers) do
   p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")
 end
+local ts_install = require("nvim-treesitter.install")
+ts_install.prefer_git = true
+ts_install.compilers = { "gcc", "clang" }
+local parsers = require("nvim-treesitter.parsers").get_parser_configs()
+for _, p in pairs(parsers) do
+  p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")
+end
 require("nvim-treesitter.configs").setup({
-  -- A list of parser names, or "all" (the five listed parsers should always be installed)
   ensure_installed = {
     "bash",
     "c",
@@ -301,6 +286,20 @@ require("nvim-treesitter.configs").setup({
     additional_vim_regex_highlighting = false,
   },
 })
+require("treesitter-context").setup({
+  enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+  max_lines = 10, -- How many lines the window should span. Values <= 0 mean no limit.
+  min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
+  line_numbers = true,
+  multiline_threshold = 1, -- Maximum number of lines to collapse for a single context line
+  trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+  mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
+  -- Separator between context and content. Should be a single character string, like '-'.
+  -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+  separator = nil,
+  zindex = 20, -- The Z-index of the context window
+})
+vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
 local fzf = require("fzf-lua")
 fzf.setup({
@@ -319,22 +318,22 @@ fzf.setup({
   },
 })
 
-vim.keymap.set("n", "<leader>ff", fzf.files)
-vim.keymap.set("n", "<leader>fd", fzf.git_files)
-vim.keymap.set("n", "<leader>fr", fzf.oldfiles)
-vim.keymap.set("n", "<leader>rs", fzf.resume)
-vim.keymap.set("n", "<leader>tt", fzf.tags)
-vim.keymap.set("n", "<leader>st", fzf.btags)
-vim.keymap.set("n", "<leader>tl", fzf.tags_live_grep)
-vim.keymap.set("n", "<leader>gt", fzf.tags_grep_cword)
-vim.keymap.set("n", "<leader>bb", fzf.buffers)
-vim.keymap.set("n", "<leader>er", fzf.lsp_references)
-vim.keymap.set("n", "<leader>ed", fzf.lsp_definitions)
-vim.keymap.set("n", "<leader>eD", fzf.lsp_declarations)
-vim.keymap.set("n", "<leader>sf", fzf.live_grep)
-vim.keymap.set("n", "<leader>ss", fzf.grep_project)
-vim.keymap.set("n", "<leader>sd", fzf.grep_cword)
-vim.keymap.set("n", "<leader>sD", fzf.grep_cWORD)
+vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "Fuzzy find files" })
+vim.keymap.set("n", "<leader>fd", fzf.git_files, { desc = "Fuzzy find git files" })
+vim.keymap.set("n", "<leader>fr", fzf.oldfiles, { desc = "Fuzzy find recent files" })
+vim.keymap.set("n", "<leader>rs", fzf.resume, { desc = "Resume last fzf" })
+vim.keymap.set("n", "<leader>tt", fzf.tags, { desc = "Fuzzy find all tags" })
+vim.keymap.set("n", "<leader>st", fzf.btags, { desc = "Fuzzy find buffer tags" })
+vim.keymap.set("n", "<leader>tl", fzf.tags_live_grep, { desc = "Fuzzy find tags live grep" })
+vim.keymap.set("n", "<leader>gt", fzf.tags_grep_cword, { desc = "Fuzzy find tags grep cword" })
+vim.keymap.set("n", "<leader>bb", fzf.buffers, { desc = "Fuzzy find buffers" })
+vim.keymap.set("n", "<leader>er", fzf.lsp_references, { desc = "Fuzzy find references" })
+vim.keymap.set("n", "<leader>ed", fzf.lsp_definitions, { desc = "Fuzzy find definitions" })
+vim.keymap.set("n", "<leader>eD", fzf.lsp_declarations, { desc = "Fuzzy find declarations" })
+vim.keymap.set("n", "<leader>sf", fzf.live_grep, { desc = "Fuzzy find live grep" })
+vim.keymap.set("n", "<leader>ss", fzf.grep_project, { desc = "Fuzzy find grep project" })
+vim.keymap.set("n", "<leader>sd", fzf.grep_cword, { desc = "Fuzzy find grep cword" })
+vim.keymap.set("n", "<leader>sD", fzf.grep_cWORD, { desc = "Fuzzy find grep cWORD" })
 
 vim.keymap.set("n", "<A-x>", fzf.commands)
 vim.keymap.set("i", "<A-x>", fzf.commands)
@@ -349,13 +348,6 @@ require("osc52").setup({
 vim.keymap.set("n", "<A-w>", require("osc52").copy_operator, { expr = true })
 vim.keymap.set("n", "<leader>cc", "<leader>c_", { remap = true })
 vim.keymap.set("v", "<A-w>", require("osc52").copy_visual)
-
-require("auto-save").setup({})
-map("n", "]h", "<Plug>(GitGutterNextHunk)", opt)
-map("n", "[h", "<Plug>(GitGutterPrevHunk)", opt)
-vim.cmd([[command U GitGutterUndoHunk]])
-
-require("neogit").setup({})
 
 vim.cmd([[
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
@@ -380,38 +372,11 @@ if executable('rg')
 endif
 ]])
 
--- require("ibl").setup()
 vim.cmd([[
 let g:indentLine_enabled = 1
 ]])
-
 require("guess-indent").setup({})
-
-require("aerial").setup({
-  -- optionally use on_attach to set keymaps when aerial has attached to a buffer
-  on_attach = function(bufnr)
-    -- Jump forwards/backwards with '{' and '}'
-    vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
-    vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
-  end,
-})
--- You probably also want to set a keymap to toggle aerial
-vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
-
-require("treesitter-context").setup({
-  enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-  max_lines = 10, -- How many lines the window should span. Values <= 0 mean no limit.
-  min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-  line_numbers = true,
-  multiline_threshold = 1, -- Maximum number of lines to collapse for a single context line
-  trim_scope = "outer", -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-  mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
-  -- Separator between context and content. Should be a single character string, like '-'.
-  -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-  separator = nil,
-  zindex = 20, -- The Z-index of the context window
-})
-vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
+require("bigfile").setup()
 
 vim.cmd([[
 let g:copilot_proxy = getenv('http_proxy')
@@ -419,46 +384,15 @@ imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
 let g:copilot_no_tab_map = v:true
 ]])
 
--- default configuration
 require("illuminate").configure({
   -- delay = 0,
   under_cursor = false,
 })
 
-if load_extra_package then
-  require("pastify").setup({
-    opts = {
-      absolute_path = false, -- use absolute or relative path to the working directory
-      apikey = "", -- Api key, required for online saving
-      local_path = "/assets/", -- The path to put local files in, ex ~/Projects/<name>/assets/images/<imgname>.png
-      save = "local", -- Either 'local' or 'online'
-    },
-    ft = { -- Custom snippets for different filetypes, will replace $IMG$ with the image url
-      html = '<img src="$IMG$" alt="">',
-      markdown = "![]($IMG$)",
-      tex = [[\includegraphics[width=\linewidth]{$IMG$}]],
-    },
-  })
-end
+require("nvim-tree").setup {}
 
-vim.cmd([[
-let g:neoformat_c_clangformat = {
-      \ 'exe': 'clang-format',
-      \ 'args': ['-style=file'],
-      \ }
-let g:neoformat_enabled_cpp = ['clangformat']
-let g:neoformat_enabled_c = ['clangformat']
-]])
-
--- the conceallevel should be set to 0 by default, but we should explicitly set it to 0 for markdown filetype
-vim.cmd([[
-function! SetConcealLevel()
-    set conceallevel=0
-endfunction
-
-autocmd FileType markdown call timer_start(500, {-> SetConcealLevel()})
-]])
-
-vim.cmd([[
-nnoremap <silent> <F12> :call PostArsyncScript()<CR>
-]])
+require("rsync-build").setup()
+local rb = require("rsync-build")
+vim.keymap.set("n", "<leader>l", function()
+  rb.upload_dir()
+end, { desc = "Send file rsync-build" })

@@ -78,3 +78,31 @@ vim.opt.termguicolors = true
 vim.cmd([[
 set cino+=g0,N-s
 ]])
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"lua", "c", "cpp"},
+  callback = function(args)
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+  end,
+  desc = "Set 2-space indent for lua, c, cpp",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"markdown", "tex"},
+  callback = function(args)
+    vim.opt_local.wrap = true
+
+    local opts = { silent = true, buffer = args.buf, }
+    vim.keymap.set('n', 'j', 'gj', opts)
+    vim.keymap.set('n', 'k', 'gk', opts)
+    vim.keymap.set('n', '0', 'g0', opts)
+    vim.keymap.set('n', '^', 'g^', opts)
+
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.softtabstop = 2
+  end,
+  desc = "Apply wrap and visual line movement keys for Markdown and Tex files",
+})

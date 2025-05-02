@@ -65,7 +65,7 @@ require("lazy").setup({
 
     "github/copilot.vim",
     {
-      "nvim-tree/nvim-tree.lua",
+      "nahso/nvim-tree.lua",
       dependencies = { "nvim-tree/nvim-web-devicons" },
     },
     { "nahso/rsync-build.nvim" }

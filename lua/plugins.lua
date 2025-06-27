@@ -68,7 +68,7 @@ require("lazy").setup({
       "nahso/nvim-tree.lua",
       dependencies = { "nvim-tree/nvim-web-devicons" },
     },
-    { "nahso/rsync-build.nvim" }
+    { "nahso/rsync-build.nvim", dir = "~/Git/rsync-build.nvim" }
   },
 })
 

@@ -123,11 +123,6 @@ end, { desc = "Format selection" })
 
 require("lint").linters_by_ft = {
   python = { "flake8", "mypy" },
-  cpp = { "clangtidy" },
-  c = { "clangtidy" },
-}
-require("lint").linters.clangtidy.args = {
-  "--config-file=~/.clang-tidy"
 }
 vim.cmd([[
 au BufWritePost * lua require('lint').try_lint()
@@ -135,7 +130,18 @@ au BufReadPost * lua require('lint').try_lint()
 ]])
 
 local cmp_nvim_lsp = require("cmp_nvim_lsp")
-require("lspconfig").basedpyright.setup({})
+require("lspconfig").basedpyright.setup({
+  settings = {
+    basedpyright = {
+      analysis = {
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+        diagnosticMode = 'openFilesOnly',
+        typeCheckingMode = "basic",
+      },
+    },
+  },
+})
 require("lspconfig").clangd.setup({
   on_attach = on_attach,
   capabilities = cmp_nvim_lsp.default_capabilities(),
@@ -148,6 +154,7 @@ require("lspconfig").clangd.setup({
     "--enable-config",
   },
 })
+vim.lsp.set_log_level("off")
 
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })

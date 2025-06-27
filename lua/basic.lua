@@ -77,6 +77,49 @@ vim.opt.termguicolors = true
 
 vim.cmd([[
 set cino+=g0,N-s
+" Don't indent template
+function! CppNoTemplateIndent()
+  let l:cline_num = line('.')
+  let l:cline = getline(l:cline_num)
+  let l:pline_num = prevnonblank(l:cline_num - 1)
+  let l:pline = getline(l:pline_num)
+
+  " Skip comment lines and lone braces
+  while l:pline =~# '\(^\s*{\s*\|^\s*//\|^\s*/\*\|\*/\s*$\)'
+    let l:pline_num = prevnonblank(l:pline_num - 1)
+    let l:pline = getline(l:pline_num)
+  endwhile
+
+  " Template indentation rule
+  let l:retv = cindent('.')
+  let l:pindent = indent(l:pline_num)
+  let l:is_template_rule = 0
+  " previous line only has a `template`
+  if l:pline =~# '^\s*template\s*\s*$' " 
+    let l:retv = l:pindent + &shiftwidth
+    let l:is_template_rule = 1
+  " previous line has a `typename` and ends with a comma
+  elseif l:pline =~# '\s*typename\s*.*,\s*$' 
+    let l:retv = l:pindent + &shiftwidth
+    let l:is_template_rule = 1
+  " current line has only a `>`
+  elseif l:cline =~# '^\s*>\s*$'
+    let l:retv = l:pindent + &shiftwidth
+    let l:is_template_rule = 1
+  elseif l:pline =~# '\s*typename\s*.*>\s*$'
+    let l:retv = l:pindent
+    let l:is_template_rule = 1
+  endif
+
+  if !l:is_template_rule
+  endif
+
+  return l:retv
+endfunction
+
+if has("autocmd")
+  autocmd BufEnter *.{cc,cxx,cpp,h,hh,hpp,hxx} setlocal indentexpr=CppNoTemplateIndent()
+endif
 ]])
 
 vim.api.nvim_create_autocmd("FileType", {

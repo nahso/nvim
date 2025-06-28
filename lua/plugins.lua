@@ -33,6 +33,7 @@ require("lazy").setup({
     "farmergreg/vim-lastplace",
     "max397574/better-escape.nvim",
     "lewis6991/gitsigns.nvim",
+    "tpope/vim-fugitive",
     "Pocco81/auto-save.nvim",
     "ibhagwan/fzf-lua",
     "ojroques/nvim-osc52",

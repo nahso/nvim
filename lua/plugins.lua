@@ -25,7 +25,9 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
   spec = {
     "folke/tokyonight.nvim",
+    "miikanissi/modus-themes.nvim",
     "nvim-tree/nvim-web-devicons",
+    "stevearc/oil.nvim",
 
     "kylechui/nvim-surround",
     "phaazon/hop.nvim", -- 's' jump
@@ -45,6 +47,7 @@ require("lazy").setup({
     "wellle/targets.vim", -- text objects
     "folke/which-key.nvim",
     "RRethy/vim-illuminate",
+    "rickhowe/spotdiff.vim",
 
     "stevearc/conform.nvim",
     "mfussenegger/nvim-lint",
@@ -61,14 +64,20 @@ require("lazy").setup({
     },
     "nvim-treesitter/nvim-treesitter-context",
     "ludovicchabant/vim-gutentags",
-    "Yggdroot/indentLine",
+    {
+      "lukas-reineke/indent-blankline.nvim",
+      main = "ibl",
+      ---@module "ibl"
+      ---@type ibl.config
+      opts = {},
+    },
     "NMAC427/guess-indent.nvim",
 
     "github/copilot.vim",
-    {
-      "nahso/nvim-tree.lua",
-      dependencies = { "nvim-tree/nvim-web-devicons" },
-    },
+    -- {
+    --   "nahso/nvim-tree.lua",
+    --   dependencies = { "nvim-tree/nvim-web-devicons" },
+    -- },
     { "nahso/rsync-build.nvim", dir = "~/Git/rsync-build.nvim" }
   },
 })
@@ -88,6 +97,7 @@ highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
 ]])
 
 require("nvim-surround").setup()
+require("oil").setup()
 
 require("hop").setup()
 vim.api.nvim_command("hi HopNextKey guifg=#00ff00")
@@ -123,7 +133,6 @@ vim.keymap.set("v", "<leader>8", function()
 end, { desc = "Format selection" })
 
 require("lint").linters_by_ft = {
-  python = { "flake8", "mypy" },
 }
 vim.cmd([[
 au BufWritePost * lua require('lint').try_lint()
@@ -131,19 +140,8 @@ au BufReadPost * lua require('lint').try_lint()
 ]])
 
 local cmp_nvim_lsp = require("cmp_nvim_lsp")
-require("lspconfig").basedpyright.setup({
-  settings = {
-    basedpyright = {
-      analysis = {
-        autoSearchPaths = true,
-        useLibraryCodeForTypes = true,
-        diagnosticMode = 'openFilesOnly',
-        typeCheckingMode = "basic",
-      },
-    },
-  },
-})
-require("lspconfig").clangd.setup({
+vim.lsp.config("pyright", {})
+vim.lsp.config("clangd", {
   on_attach = on_attach,
   capabilities = cmp_nvim_lsp.default_capabilities(),
   cmd = {
@@ -155,6 +153,8 @@ require("lspconfig").clangd.setup({
     "--enable-config",
   },
 })
+vim.lsp.enable('pyright')
+vim.lsp.enable('clangd')
 vim.lsp.set_log_level("off")
 
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
@@ -380,9 +380,9 @@ if executable('rg')
 endif
 ]])
 
-vim.cmd([[
-let g:indentLine_enabled = 1
-]])
+require("ibl").setup({
+  scope = { enabled = false },
+})
 require("guess-indent").setup({})
 require("bigfile").setup()
 
@@ -397,7 +397,7 @@ require("illuminate").configure({
   under_cursor = false,
 })
 
-require("nvim-tree").setup {}
+-- require("nvim-tree").setup {}
 
 require("rsync-build").setup()
 local rb = require("rsync-build")

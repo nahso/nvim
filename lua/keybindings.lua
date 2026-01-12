@@ -30,6 +30,16 @@ map("i", "<A-[>", "<c-w><", opt)
 map("i", "<A-]>", "<c-w>>", opt)
 
 vim.cmd([[
+cnoremap <C-A> <Home>
+cnoremap <C-F> <Right>
+cnoremap <C-B> <Left>
+cnoremap <Esc>b <S-Left>
+cnoremap <Esc>f <S-Right>
+
+tnoremap <Esc> <C-\><C-n>
+]])
+
+vim.cmd([[
 " see: https://vi.stackexchange.com/questions/2350/how-to-map-alt-key
 execute "set <M-j>=\ej"
 execute "set <M-k>=\ek"

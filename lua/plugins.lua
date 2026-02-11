@@ -25,6 +25,8 @@ vim.g.maplocalleader = "\\"
 require("lazy").setup({
   spec = {
     "folke/tokyonight.nvim",
+    "Mofiqul/vscode.nvim",
+    "EdenEast/nightfox.nvim",
     "miikanissi/modus-themes.nvim",
     "nvim-tree/nvim-web-devicons",
     "stevearc/oil.nvim",
@@ -78,23 +80,94 @@ require("lazy").setup({
     --   "nahso/nvim-tree.lua",
     --   dependencies = { "nvim-tree/nvim-web-devicons" },
     -- },
+    {
+      "CopilotC-Nvim/CopilotChat.nvim",
+      dependencies = {
+        { "nvim-lua/plenary.nvim", branch = "master" },
+      },
+      build = "make tiktoken",
+      opts = {
+        model = 'gemini-3-flash-preview',           -- AI model to use
+        temperature = 0.1,           -- Lower = focused, higher = creative
+        window = {
+          layout = 'vertical',       -- 'vertical', 'horizontal', 'float'
+          width = 0.5,              -- 50% of screen width
+        },
+        auto_insert_mode = true,     -- Enter insert mode when opening
+      },
+    },
     { "nahso/rsync-build.nvim", dir = "~/Git/rsync-build.nvim" }
   },
 })
 
-require("tokyonight").setup({
-  style = "night",
-  styles = {
-    comments = { italic = false },
+-- require("tokyonight").setup({
+--   style = "night",
+--   styles = {
+--     comments = { italic = false },
+--   },
+--   on_colors = function(colors)
+--     colors.comment = "#6a9955"
+--   end,
+-- })
+-- vim.cmd([[
+-- colorscheme tokyonight
+-- highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
+-- ]])
+
+vim.o.background = 'dark'
+require('vscode').setup({
+  -- Alternatively set style in setup
+  -- style = 'light'
+  transparent = false,
+
+  -- Enable italic comment
+  italic_comments = false,
+
+  -- Enable italic inlay type hints
+  italic_inlayhints = true,
+
+  -- Underline `@markup.link.*` variants
+  underline_links = true,
+
+  -- Disable nvim-tree background color
+  disable_nvimtree_bg = true,
+
+  -- Apply theme colors to terminal
+  terminal_colors = true,
+
+  group_overrides = {
+    CursorLine = { bg = '#333333' },
+
+    -- 1. 非当前匹配项：不那么亮眼的橙色（使用更深的橙色以减少亮度，但保持显眼）
+    Search = { 
+      fg = '#ffffff', 
+      bg = '#daa520',
+      bold = true,
+    },
+    
+    -- 2. 当前匹配项：保持亮绿色以提供对比
+    IncSearch = { 
+      fg = '#000000',     -- 黑色文字
+      bg = '#7cfc00',     -- 草绿色/亮绿色背景
+      bold = true,
+    },
+
+    -- 3. 确保新版 Neovim 的 CurSearch 也同步（直接链接到 IncSearch）
+    CurSearch = { link = 'IncSearch' },
+    StatusLine = { fg = '#ffffff', bg = '#007acc', bold = true },
+    -- 不活动状态栏：使用暗蓝色背景，保持白色文字，但不加粗以区分
+    StatusLineNC = { fg = '#ffffff', bg = '#004080', bold = false },
+    -- Diff视图中删除的文本：使用不显眼的红色背景
+    DiffDelete = { bg = '#b22222', fg = '#ffffff', bold = true },
+    -- 修改的行：使用更不显眼的红色背景，比DiffText暗一些
+    DiffChange = { bg = '#8b0000', fg = '#ffffff' },
+    -- 修改行中具体改变的部分：保持亮红色以突出，不能比这个更暗
+    DiffText = { bg = '#ff0000', fg = '#ffffff', bold = true },
+    -- Diff视图中新增的行：使用不显眼的绿色背景，与红色显眼程度一致
+    DiffAdd = { bg = '#006400', fg = '#ffffff' },
   },
-  on_colors = function(colors)
-    colors.comment = "#6a9955"
-  end,
 })
-vim.cmd([[
-colorscheme tokyonight
-highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
-]])
+vim.cmd.colorscheme "vscode"
 
 require("nvim-surround").setup()
 require("oil").setup()
@@ -407,3 +480,10 @@ end, { desc = "Send file rsync-build" })
 vim.keymap.set("n", "<leader>;", function()
   rb.do_action()
 end, { desc = "Send file rsync-build" })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "copilot-chat",
+  callback = function()
+    vim.opt_local.conceallevel = 0
+  end,
+})

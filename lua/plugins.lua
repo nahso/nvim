@@ -67,12 +67,23 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter-context",
     "ludovicchabant/vim-gutentags",
     {
-      "lukas-reineke/indent-blankline.nvim",
-      main = "ibl",
-      ---@module "ibl"
-      ---@type ibl.config
-      opts = {},
+      "shellRaining/hlchunk.nvim",
+      event = { "BufReadPre", "BufNewFile" },
+      config = function()
+        require("hlchunk").setup({
+          indent = {
+            enable = true
+          }
+        })
+      end
     },
+    -- {
+    --   "lukas-reineke/indent-blankline.nvim",
+    --   main = "ibl",
+    --   ---@module "ibl"
+    --   ---@type ibl.config
+    --   opts = {},
+    -- },
     "NMAC427/guess-indent.nvim",
 
     "github/copilot.vim",
@@ -453,9 +464,9 @@ if executable('rg')
 endif
 ]])
 
-require("ibl").setup({
-  scope = { enabled = false },
-})
+-- require("ibl").setup({
+--   scope = { enabled = false },
+-- })
 require("guess-indent").setup({})
 require("bigfile").setup()
 

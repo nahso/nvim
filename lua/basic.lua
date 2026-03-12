@@ -149,3 +149,15 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
   desc = "Apply wrap and visual line movement keys for Markdown and Tex files",
 })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    -- 允许 << 和 >> 缩进 # 开头的注释行
+    -- '0#' 表示如果输入 # 则不跳转到行首
+    vim.opt_local.indentkeys:remove("0#")
+    -- 有时 nosmartindent 也会影响，确保它在 python 中是关闭的或调整其行为
+    vim.opt_local.smartindent = false
+  end,
+  desc = "Fix python comment indentation for << and >>",
+})

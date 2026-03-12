@@ -87,26 +87,11 @@ require("lazy").setup({
     "NMAC427/guess-indent.nvim",
 
     "github/copilot.vim",
-    -- {
-    --   "nahso/nvim-tree.lua",
-    --   dependencies = { "nvim-tree/nvim-web-devicons" },
-    -- },
     {
-      "CopilotC-Nvim/CopilotChat.nvim",
-      dependencies = {
-        { "nvim-lua/plenary.nvim", branch = "master" },
-      },
-      build = "make tiktoken",
-      opts = {
-        model = 'gemini-3-flash-preview',           -- AI model to use
-        temperature = 0.1,           -- Lower = focused, higher = creative
-        window = {
-          layout = 'vertical',       -- 'vertical', 'horizontal', 'float'
-          width = 0.5,              -- 50% of screen width
-        },
-        auto_insert_mode = true,     -- Enter insert mode when opening
-      },
+      "nahso/nvim-tree.lua",
+      dependencies = { "nvim-tree/nvim-web-devicons" },
     },
+    "nvim-lua/plenary.nvim",
     { "nahso/rsync-build.nvim", dir = "~/Git/rsync-build.nvim" }
   },
 })
@@ -492,9 +477,3 @@ vim.keymap.set("n", "<leader>;", function()
   rb.do_action()
 end, { desc = "Send file rsync-build" })
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "copilot-chat",
-  callback = function()
-    vim.opt_local.conceallevel = 0
-  end,
-})

@@ -53,7 +53,7 @@ local function open_remote_ssh_term(opts)
             -- macOS: 使用 osascript 调用系统级通知和提示音
             local notify_cmd = string.format([[osascript -e 'display notification "%s" with title "Neovim SSH"']], msg)
             os.execute(notify_cmd .. " &")
-            os.execute("afplay -v 50 /System/Library/Sounds/Ping.aiff &")
+            os.execute("afplay -v 30 /System/Library/Sounds/Ping.aiff &")
         elseif os_name == "Linux" then
             -- Linux: 使用 notify-send 并附加基于 paplay 或 terminal bell 的声音支持
             os.execute(string.format("notify-send \"Neovim SSH\" \"%s\" -u normal &", msg))
@@ -68,16 +68,16 @@ local function open_remote_ssh_term(opts)
     local term_opts = {
         on_stdout = function(_, data, _)
             if not data then return end
-            
+
             -- 将当前数据块拼接，拦截并解析备用屏幕缓冲区切换指令
             local chunk = table.concat(data, "\n")
-            
+
             -- 检测进入备用屏幕缓冲区 (如启动 Vim, htop, less)
             if chunk:find('\27%[%?1049h') or chunk:find('\27%[%?47h') then
                 in_tui_mode = true
                 cmd_start_time = nil -- 丢弃当前计时，避免累计
             end
-            
+
             -- 检测退出备用屏幕缓冲区 (如退出 Vim)
             if chunk:find('\27%[%?1049l') or chunk:find('\27%[%?47l') then
                 in_tui_mode = false
@@ -92,12 +92,12 @@ local function open_remote_ssh_term(opts)
             if last_line == "" and #data > 1 then
                 last_line = data[#data-1]
             end
-            
+
             if not last_line or last_line == "" then return end
 
             -- 剔除 CSI (Control Sequence Introducer) 和 OSC (Operating System Command) 的 ANSI 转移序列
             local clean_line = last_line:gsub('\x1b%[[%d;]*[a-zA-Z]', ''):gsub('\x1b%].-\x07', '')
-            
+
             -- 验证终端提示符 (支持常规 Bash/Zsh/Fish: 以 $, #, %, 或 > 结尾)
             local is_prompt = clean_line:match("[%#%$%%>]%s*$") ~= nil
 
@@ -113,7 +113,10 @@ local function open_remote_ssh_term(opts)
             else
                 -- 未检测到提示符，视为有进程执行或键盘输入
                 if not cmd_start_time then
-                    cmd_start_time = os.time()
+                    -- 修复：通过检测换行符隔离键盘单字回显与回车执行
+                    if #data > 1 then
+                        cmd_start_time = os.time()
+                    end
                 end
             end
         end
@@ -122,12 +125,12 @@ local function open_remote_ssh_term(opts)
     -- 创建窗口并打开终端
     vim.cmd("botright 15new") 
     vim.fn.termopen(ssh_cmd, term_opts)
-    
+
     -- 设置一些终端窗口的常用属性
     vim.wo.number = false
     vim.wo.relativenumber = false
     vim.wo.signcolumn = "no"
-    
+
     -- 4. 如果传了参数，则设置 Buffer 名字
     -- opts.args 是用户输入的字符串
     if opts.args and opts.args ~= "" then

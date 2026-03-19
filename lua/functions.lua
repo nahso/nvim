@@ -6,8 +6,8 @@ local function open_remote_ssh_term(opts)
             ssh_host    = "shenchao" 
         },
         {
-            local_root  = "/Users/dym/Git/shenchao-MatRIS/MatRIS",
-            remote_root = "/home/share/duyiming/MatRIS",
+            local_root  = "/Users/dym/Git/hbm_lib_dev",
+            remote_root = "/home/share/duyiming/hbm_lib_dev",
             ssh_host    = "shenchao" 
         },
     }

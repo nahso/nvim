@@ -145,7 +145,40 @@ vim.cmd.colorscheme "vscode"
 -- 核心操作类插件配置
 -- ==========================================
 require("nvim-surround").setup()
-require("oil").setup()
+require("oil").setup({
+  float = {
+    padding = 2,
+    max_width = 0,
+    max_height = 0,
+    border = "rounded", -- 改动点 1：浮动主窗口边框
+    win_options = {
+      winblend = 0,
+    },
+    -- ...
+  },
+  -- ...
+  confirmation = {
+    -- ...
+    border = "rounded", -- 改动点 2：操作确认对话框边框
+    win_options = {
+      winblend = 0,
+    },
+  },
+  progress = {
+    -- ...
+    border = "rounded", -- 改动点 3：进度条窗口边框
+    minimized_border = "none",
+    win_options = {
+      winblend = 0,
+    },
+  },
+  ssh = {
+    border = "rounded", -- 改动点 4：SSH 相关弹窗边框
+  },
+  keymaps_help = {
+    border = "rounded", -- 改动点 5：快捷键帮助窗口边框
+  },
+})
 
 -- Flash.nvim 配置
 require("flash").setup({

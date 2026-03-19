@@ -318,8 +318,14 @@ cmp.setup({
     end,
   },
   window = {
-    documentation = cmp.config.window.bordered(),
-    completion = cmp.config.window.bordered(),
+    completion = cmp.config.window.bordered({
+      border = 'rounded', -- 可选 'single', 'double', 'shadow', 'rounded'
+      winhighlight = 'Normal:CmpPmenu,CursorLine:PmenuSel,Search:None',
+    }),
+    documentation = cmp.config.window.bordered({
+      border = 'rounded',
+      winhighlight = 'Normal:CmpDoc,Search:None',
+    }),
   },
   mapping = cmp.mapping.preset.insert({
     ["<C-u>"] = cmp.mapping.scroll_docs(-4),

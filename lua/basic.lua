@@ -1,130 +1,101 @@
-vim.g.encoding = "UTF-8"
-vim.o.fileencoding = "utf-8"
+-- ==========================================================================
+-- 视图与界面渲染 (UI & Display)
+-- ==========================================================================
 
-vim.o.scrolloff = 5
-vim.o.sidescrolloff = 5
-
-vim.wo.number = true
-vim.wo.relativenumber = true
-vim.wo.cursorline = true
-
-vim.o.tabstop = 4
-vim.bo.tabstop = 4
-vim.o.softtabstop = 4
-vim.o.shiftround = true
-vim.o.shiftwidth = 4
-vim.bo.shiftwidth = 4
-vim.o.expandtab = true
-vim.bo.expandtab = true
-
-vim.o.autoindent = true
-vim.bo.autoindent = true
-vim.o.smartindent = true
-
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
-vim.o.incsearch = true
-
-vim.o.autoread = true
-vim.bo.autoread = true
-
-vim.wo.wrap = false
-
-vim.o.hidden = true
-
-vim.o.mouse = "a"
-
-vim.o.backup = false
-vim.o.writebackup = false
-vim.o.swapfile = false
-
-vim.o.updatetime = 300
-
---vim.o.timeoutlen = 200
---vim.o.timeout = false
---vim.o.ttimeout = false
-
-vim.o.splitbelow = true
-vim.o.splitright = true
-
-vim.g.completeopt = "menu,menuone,noselect,noinsert"
-
-vim.o.background = "dark"
-vim.o.termguicolors = true
+-- 显示行号
+vim.opt.number = true
+-- 显示相对行号
+vim.opt.relativenumber = true
+-- 高亮当前光标所在行
+vim.opt.cursorline = true
+-- 启用真彩色支持
 vim.opt.termguicolors = true
-vim.env.NVIM_TUI_ENABLE_TRUE_COLOR = 1
+-- 设置深色背景主题
+vim.opt.background = "dark"
+-- 不显示模式信息（如 -- INSERT --）
+vim.opt.showmode = false
+-- 补全弹出菜单的最大高度为 10 行
+vim.opt.pumheight = 10
 
-vim.o.wildmenu = true
+-- 垂直滚动偏移：光标距离屏幕顶部或底部 5 行时自动滚动
+vim.opt.scrolloff = 5
+-- 水平滚动偏移：光标距离屏幕左侧或右侧 5 个字符时自动滚动
+vim.opt.sidescrolloff = 5
 
-vim.o.shortmess = vim.o.shortmess .. "c"
+-- ==========================================================================
+-- 缩进与排版 (Indent & Formatting)
+-- ==========================================================================
 
-vim.o.pumheight = 10
+-- 1 个 Tab 字符在屏幕上显示的宽度
+vim.opt.tabstop = 4
+-- 编辑模式下按 Tab 或 Backspace 时视作的空格数
+vim.opt.softtabstop = 4
+-- 每一级自动缩进所使用的空格数
+vim.opt.shiftwidth = 4
+-- 将 Tab 键自动转换为空格
+vim.opt.expandtab = true
+-- 缩进时自动对齐到 shiftwidth 的整数倍
+vim.opt.shiftround = true
+-- 开启针对类 C 语言风格的智能缩进
+vim.opt.smartindent = true
+-- 默认关闭自动折行
+vim.opt.wrap = false
 
-vim.o.showmode = false
+-- 是否进入“列表模式”显示不可见字符
+vim.opt.list = false
+-- 定义不可见字符的显示样式，这里设置行尾多余空格显示为 ·
+vim.opt.listchars = { trail = "·" }
 
+-- ==========================================================================
+-- 搜索与匹配 (Search)
+-- ==========================================================================
+
+-- 搜索时忽略大小写
+vim.opt.ignorecase = true
+-- 若搜索词包含大写字母，则自动转为大小写敏感匹配
+vim.opt.smartcase = true
+-- 在命令行输入命令并按 Tab 键时，在状态栏上方显示一个水平的候选列表
+vim.opt.wildmenu = true
+
+-- ==========================================================================
+-- 系统行为与性能 (System & Performance)
+-- ==========================================================================
+
+-- 在用户停止输入后，经过多少毫秒（ms）认为编辑器处于“空闲（Idle）”状态
+vim.opt.updatetime = 300
+-- 允许在未保存修改的情况下切换 Buffer
+vim.opt.hidden = true
+-- 新水平拆分窗口出现在当前窗口下方
+vim.opt.splitbelow = true
+-- 新垂直拆分窗口出现在当前窗口右侧
+vim.opt.splitright = true
+-- 不显示类似 "Match 1 of 20" 或 "Pattern not found" 的提示
+vim.opt.shortmess:append("c")
+
+-- 禁用备份文件
+vim.opt.backup = false
+-- 禁用写备份
+vim.opt.writebackup = false
+-- 禁止创建 .swap 文件
+vim.opt.swapfile = false
+
+-- 增强退格键功能，允许删掉缩进、行尾换行符及起始字符
 vim.opt.backspace = "indent,eol,start"
 
-vim.o.list = false
-vim.o.listchars = "trail:·"
+-- 补全弹出框行为：显示菜单、单个候选也显、不默认选中、不自动插入
+vim.opt.completeopt = { "menu", "menuone", "noselect", "noinsert" }
 
--- disable netrw at the very start of your init.lua (strongly advised)
--- vim.g.loaded_netrw = 1
--- vim.g.loaded_netrwPlugin = 1
+-- ==========================================================================
+-- 自动命令：针对特定文件类型的差异化配置 (Autocmds)
+-- ==========================================================================
 
--- set termguicolors to enable highlight groups
-vim.opt.termguicolors = true
+local group = vim.api.nvim_create_augroup("MyCustomGroup", { clear = true })
 
-vim.cmd([[
-set cino+=g0,N-s
-" Don't indent template
-function! CppNoTemplateIndent()
-  let l:cline_num = line('.')
-  let l:cline = getline(l:cline_num)
-  let l:pline_num = prevnonblank(l:cline_num - 1)
-  let l:pline = getline(l:pline_num)
-
-  " Skip comment lines and lone braces
-  while l:pline =~# '\(^\s*{\s*\|^\s*//\|^\s*/\*\|\*/\s*$\)'
-    let l:pline_num = prevnonblank(l:pline_num - 1)
-    let l:pline = getline(l:pline_num)
-  endwhile
-
-  " Template indentation rule
-  let l:retv = cindent('.')
-  let l:pindent = indent(l:pline_num)
-  let l:is_template_rule = 0
-  " previous line only has a `template`
-  if l:pline =~# '^\s*template\s*\s*$' " 
-    let l:retv = l:pindent + &shiftwidth
-    let l:is_template_rule = 1
-  " previous line has a `typename` and ends with a comma
-  elseif l:pline =~# '\s*typename\s*.*,\s*$' 
-    let l:retv = l:pindent + &shiftwidth
-    let l:is_template_rule = 1
-  " current line has only a `>`
-  elseif l:cline =~# '^\s*>\s*$'
-    let l:retv = l:pindent + &shiftwidth
-    let l:is_template_rule = 1
-  elseif l:pline =~# '\s*typename\s*.*>\s*$'
-    let l:retv = l:pindent
-    let l:is_template_rule = 1
-  endif
-
-  if !l:is_template_rule
-  endif
-
-  return l:retv
-endfunction
-
-if has("autocmd")
-  autocmd BufEnter *.{cc,cxx,cpp,h,hh,hpp,hxx} setlocal indentexpr=CppNoTemplateIndent()
-endif
-]])
-
+-- 为 Lua, C, C++ 文件设置 2 空格缩进
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = {"lua", "c", "cpp"},
-  callback = function(args)
+  group = group,
+  pattern = { "lua", "c", "cpp" },
+  callback = function()
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
     vim.opt_local.softtabstop = 2
@@ -132,11 +103,12 @@ vim.api.nvim_create_autocmd("FileType", {
   desc = "Set 2-space indent for lua, c, cpp",
 })
 
+-- 为 Markdown 和 LaTeX 开启自动折行，并优化折行后的光标移动逻辑
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = {"markdown", "tex"},
+  group = group,
+  pattern = { "markdown", "tex" },
   callback = function(args)
     vim.opt_local.wrap = true
-
     local opts = { silent = true, buffer = args.buf, }
     vim.keymap.set('n', 'j', 'gj', opts)
     vim.keymap.set('n', 'k', 'gk', opts)
@@ -150,7 +122,9 @@ vim.api.nvim_create_autocmd("FileType", {
   desc = "Apply wrap and visual line movement keys for Markdown and Tex files",
 })
 
+-- 修复 Python 下注释对齐问题
 vim.api.nvim_create_autocmd("FileType", {
+  group = group,
   pattern = "python",
   callback = function()
     -- 允许 << 和 >> 缩进 # 开头的注释行

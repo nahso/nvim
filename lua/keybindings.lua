@@ -1,57 +1,61 @@
+-- 设置 Leader 键
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-local map = vim.api.nvim_set_keymap
-local opt = { noremap = true, silent = true }
+-- 公共选项 (vim.keymap.set 默认就是 noremap)
+local opts = { silent = true }
+-- 基础映射 (n: Normal, v: Visual, i: Insert, t: Terminal, c: Command)
+local key = vim.keymap.set
 
-map("n", "q:", "", opt)
-map("n", "s", "", opt)
-map("n", "<leader>fs", ":w<cr>", opt)
---map("n", "<leader>ff", ":e ", opt)
-map("n", "<leader><cr>", ":noh<cr>", opt)
-map("n", "Y", "y$", opt)
+-- 禁用不常用的功能
+key("n", "q:", "<nop>", opts)
+key("n", "s", "<nop>", opts)
 
-map("n", "<leader>w", "<c-w>", opt)
-map("n", "<leader>wd", "<c-w>c", opt)
+-- 常用操作
+key("n", "<leader>fs", ":w<cr>", opts)
+key("n", "<leader><cr>", ":noh<cr>", opts) -- 清除搜索高亮
+key("n", "Y", "y$", opts)                  -- 让 Y 的行为和 D, C 一致
 
-map("v", "<leader>y", '"+y', opt)
-map("v", "<leader>p", '"+p', opt)
-map("v", "//", "y/\\V<C-R>=escape(@\",'/\\')<CR><CR>", opt)
+-- 窗口操作
+key("n", "<leader>w", "<c-w>", opts)
+key("n", "<leader>wd", "<c-w>c", opts)
 
-map("i", "<c-f>", "<right>", opt)
-map("i", "<c-b>", "<left>", opt)
-map("i", "<c-g>", "<esc>", opt)
+-- 系统剪贴板 (Visual 模式)
+key("v", "<leader>y", '"+y', opts)
+key("v", "<leader>p", '"+p', opts)
 
-map("t", "<A-i>", "<C-\\><C-n>", opt)
+-- 搜索选中的文本 (//)
+key("v", "//", [[y/\V<C-R>=escape(@", '/\')<CR><CR>]], opts)
 
-map("n", "<A-[>", "<c-w><", opt)
-map("n", "<A-]>", "<c-w>>", opt)
-map("i", "<A-[>", "<c-w><", opt)
-map("i", "<A-]>", "<c-w>>", opt)
+-- 插入模式下的位移 (类似 Emacs)
+key("i", "<c-f>", "<right>", opts)
+key("i", "<c-b>", "<left>", opts)
+key("i", "<c-g>", "<esc>", opts)
 
-vim.cmd([[
-cnoremap <C-A> <Home>
-cnoremap <C-F> <Right>
-cnoremap <C-B> <Left>
-cnoremap <Esc>b <S-Left>
-cnoremap <Esc>f <S-Right>
+-- 终端模式
+key("t", "<A-i>", [[<C-\><C-n>]], opts)
+key("t", "<Esc>", [[<C-\><C-n>]], opts) -- 统一 Esc 退出终端模式
 
-tnoremap <Esc> <C-\><C-n>
-]])
+-- 调整窗口大小 (Alt + [ / ])
+key({ "n", "i" }, "<A-[>", "<cmd>vertical resize -2<cr>", opts)
+key({ "n", "i" }, "<A-]>", "<cmd>vertical resize +2<cr>", opts)
 
-vim.cmd([[
-" see: https://vi.stackexchange.com/questions/2350/how-to-map-alt-key
-execute "set <M-j>=\ej"
-execute "set <M-k>=\ek"
-execute "set <M-h>=\eh"
-execute "set <M-l>=\el"
+-- 窗口跳转 (使用 Alt + hjkl)
+-- 0.10+ 版本不再需要 set <M-j> 这种 Hack
+key("n", "<M-j>", "<C-w>j", opts)
+key("n", "<M-k>", "<C-w>k", opts)
+key("n", "<M-h>", "<C-w>h", opts)
+key("n", "<M-l>", "<C-w>l", opts)
 
-nnoremap <M-j> <C-w>j
-nnoremap <M-k> <C-w>k
-nnoremap <M-h> <C-w>h
-nnoremap <M-l> <C-w>l
-]])
+-- 命令行模式映射 (取代 cnoremap)
+key("c", "<C-A>", "<Home>")
+key("c", "<C-F>", "<Right>")
+key("c", "<C-B>", "<Left>")
+key("c", "<Esc>b", "<S-Left>")
+key("c", "<Esc>f", "<S-Right>")
 
-map("n", "<leader>q", ":qa!<cr>", opt)
+-- 强制退出所有窗口并关闭 Neovim
+-- key("n", "<leader>q", ":qa!<cr>", opts)
 
-vim.cmd([[command D windo diffthis]])
+-- 自定义命令
+vim.api.nvim_create_user_command("D", "windo diffthis", { desc = "Diff all windows" })

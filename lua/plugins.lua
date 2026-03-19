@@ -15,12 +15,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Make sure to setup `mapleader` and `maplocalleader` before
--- loading lazy.nvim so that mappings are correct.
--- This is also a good place to setup other settings (vim.opt)
-vim.g.mapleader = " "
-vim.g.maplocalleader = "\\"
-
 -- Setup lazy.nvim
 require("lazy").setup({
   spec = {
@@ -29,24 +23,23 @@ require("lazy").setup({
     "EdenEast/nightfox.nvim",
     "miikanissi/modus-themes.nvim",
     "nvim-tree/nvim-web-devicons",
-    "stevearc/oil.nvim",
+    "stevearc/oil.nvim", -- 以编译buffer的方式操作文件系统
 
     "kylechui/nvim-surround",
-    "phaazon/hop.nvim", -- 's' jump
+    "folke/flash.nvim", -- 按 s 跳转
     "windwp/nvim-autopairs",
     "farmergreg/vim-lastplace",
     "max397574/better-escape.nvim",
     "lewis6991/gitsigns.nvim",
     "tpope/vim-fugitive",
-    "Pocco81/auto-save.nvim",
+    "okuuva/auto-save.nvim",
     "ibhagwan/fzf-lua",
-    "ojroques/nvim-osc52",
     "LunarVim/bigfile.nvim",
     "wsdjeg/vim-fetch",  -- open and jump to file:line
     "godlygeek/tabular",
     "djoshea/vim-autoread",
-    "numToStr/Comment.nvim",
-    "wellle/targets.vim", -- text objects
+
+    "echasnovski/mini.ai", -- text objects
     "folke/which-key.nvim",
     "RRethy/vim-illuminate",
     "rickhowe/spotdiff.vim",
@@ -54,62 +47,38 @@ require("lazy").setup({
     "stevearc/conform.nvim",
     "mfussenegger/nvim-lint",
 
+    "williamboman/mason.nvim",
+    "williamboman/mason-lspconfig.nvim",
     "neovim/nvim-lspconfig",
+  
     "hrsh7th/cmp-nvim-lsp",
     "hrsh7th/cmp-buffer",
     "hrsh7th/nvim-cmp",
-
+    "L3MON4D3/LuaSnip",
+    "saadparwaiz1/cmp_luasnip",
+    
+    "ojroques/nvim-osc52",
     "folke/trouble.nvim",
     {
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
     },
     "nvim-treesitter/nvim-treesitter-context",
-    "ludovicchabant/vim-gutentags",
-    {
-      "shellRaining/hlchunk.nvim",
-      event = { "BufReadPre", "BufNewFile" },
-      config = function()
-        require("hlchunk").setup({
-          indent = {
-            enable = true
-          }
-        })
-      end
-    },
-    -- {
-    --   "lukas-reineke/indent-blankline.nvim",
-    --   main = "ibl",
-    --   ---@module "ibl"
-    --   ---@type ibl.config
-    --   opts = {},
-    -- },
+    -- "ludovicchabant/vim-gutentags",
+    "shellRaining/hlchunk.nvim",
     "NMAC427/guess-indent.nvim",
 
-    "github/copilot.vim",
-    {
-      "nahso/nvim-tree.lua",
-      dependencies = { "nvim-tree/nvim-web-devicons" },
-    },
+    "zbirenbaum/copilot.lua",
+    "lervag/vimtex",
+    "stevearc/aerial.nvim",
+
     "nvim-lua/plenary.nvim",
-    { "nahso/rsync-build.nvim", dir = "~/Git/rsync-build.nvim" }
   },
 })
 
--- require("tokyonight").setup({
---   style = "night",
---   styles = {
---     comments = { italic = false },
---   },
---   on_colors = function(colors)
---     colors.comment = "#6a9955"
---   end,
--- })
--- vim.cmd([[
--- colorscheme tokyonight
--- highlight StatusLine ctermfg=white ctermbg=24 guifg=#ffffff guibg=#005f87
--- ]])
-
+-- ==========================================
+-- UI & Theme 配置
+-- ==========================================
 vim.o.background = 'dark'
 require('vscode').setup({
   -- Alternatively set style in setup
@@ -161,31 +130,70 @@ require('vscode').setup({
     DiffText = { bg = '#ff0000', fg = '#ffffff', bold = true },
     -- Diff视图中新增的行：使用不显眼的绿色背景，与红色显眼程度一致
     DiffAdd = { bg = '#006400', fg = '#ffffff' },
+
+    -- Flash: 待跳转字符 (Label) 颜色，使用洋红高亮，与搜索的橙/绿明确区分
+    FlashLabel = { bg = '#ff00ff', fg = '#ffffff', bold = true },
+    -- Flash: 输入停顿时已匹配的背景文本颜色，使用深灰降低视觉干扰
+    FlashMatch = { bg = '#555555', fg = '#ffffff' },
+    -- Flash: 当前光标所在匹配项
+    FlashCurrent = { link = 'IncSearch' },
   },
 })
 vim.cmd.colorscheme "vscode"
 
+-- ==========================================
+-- 核心操作类插件配置
+-- ==========================================
 require("nvim-surround").setup()
 require("oil").setup()
 
-require("hop").setup()
-vim.api.nvim_command("hi HopNextKey guifg=#00ff00")
-vim.api.nvim_command("hi HopNextKey1 guifg=#00ff00")
-vim.api.nvim_command("hi HopNextKey2 guifg=#00ff00")
-vim.keymap.set("n", "s", require("hop").hint_char2)
-vim.keymap.set("v", "s", require("hop").hint_char2)
+-- Flash.nvim 配置
+require("flash").setup({
+  -- 全局默认标签（根据你的需求自定义顺序）
+  labels = "asdfghjklqwertyuiopzxcvbnm",
+  highlight = {
+    -- 默认关闭全局背景遮罩（影响 s 键跳转）
+    backdrop = false,
+  },
+  modes = {
+    -- 针对 f, F, t, T, ;, , 运动的特定设置
+    char = {
+      enabled = true,
+      -- 1. 禁用跨行匹配，仅限当前行
+      multi_line = false,
+      -- 2. 核心修改：显式禁用字符查找模式下的背景变暗效果
+      highlight = { 
+        backdrop = false 
+      },
+      -- 保持你的默认键位行为
+      jump_labels = false,
+    },
+  },
+})
+vim.keymap.set({ "n", "x", "o" }, "s", function() require("flash").jump() end, { desc = "Flash" })
+vim.keymap.set({ "n", "x", "o" }, "S", function() require("flash").treesitter() end, { desc = "Flash Treesitter" })
+
+require("mini.ai").setup()
+
+require("hlchunk").setup({
+  indent = {
+    enable = true
+  }
+})
 
 require("nvim-autopairs").setup()
-require("Comment").setup()
 require("which-key").setup({
   delay = 2000,
 })
 
+-- ==========================================
+-- 格式化与 Lint (使用 Ruff)
+-- ==========================================
 require("conform").setup({
   formatters_by_ft = {
     c = { "clang-format" },
     cpp = { "clang-format" },
-    python = { "black", "isort" },
+    python = { "ruff_format", "ruff_fix" },
     lua = { "stylua" },
   },
   default_format_opts = {
@@ -208,22 +216,74 @@ au BufWritePost * lua require('lint').try_lint()
 au BufReadPost * lua require('lint').try_lint()
 ]])
 
-local cmp_nvim_lsp = require("cmp_nvim_lsp")
-vim.lsp.config("pyright", {})
-vim.lsp.config("clangd", {
-  on_attach = on_attach,
-  capabilities = cmp_nvim_lsp.default_capabilities(),
-  cmd = {
-    "clangd",
-    "--offset-encoding=utf-16",
-    "--background-index",
-    "--suggest-missing-includes",
-    "-j=8",
-    "--enable-config",
-  },
+-- ==========================================
+-- LSP & Mason 配置
+-- ==========================================
+local function ensure_ts_cli()
+  -- 1. 检查系统 PATH 或 Mason 路径下是否已存在二进制
+  if vim.fn.executable("tree-sitter") == 1 then
+    return
+  end
+
+  -- 2. 检查 Mason 是否可用
+  local ok, mr = pcall(require, "mason-registry")
+  if not ok then
+    vim.notify("mason-registry not found", vim.log.levels.WARN)
+    return
+  end
+
+  -- 3. 获取并安装工具
+  local package_name = "tree-sitter-cli"
+  
+  -- 确保在注册表刷新后操作（异步安装流程）
+  mr.refresh(function()
+    local p = mr.get_package(package_name)
+    if not p:is_installed() then
+      vim.notify("Installing tree-sitter-cli via Mason...", vim.log.levels.INFO)
+      p:install():once("terminate", function(success)
+        if success then
+          vim.notify("tree-sitter-cli installed successfully.", vim.log.levels.INFO)
+          -- 安装成功后，手动将 Mason 的 bin 目录临时加入 PATH 供当前进程使用
+          local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+          vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+        else
+          vim.notify("Failed to install tree-sitter-cli.", vim.log.levels.ERROR)
+        end
+      end)
+    end
+  end)
+end
+
+require("mason").setup()
+ensure_ts_cli()
+
+require("mason-lspconfig").setup({
+  ensure_installed = { "clangd", "pyright", "ruff", "texlab" }
 })
-vim.lsp.enable('pyright')
-vim.lsp.enable('clangd')
+
+local cmp_nvim_lsp = require("cmp_nvim_lsp")
+local capabilities = cmp_nvim_lsp.default_capabilities()
+
+require("mason-lspconfig").setup({
+  function(server_name)
+    require("lspconfig")[server_name].setup({
+      capabilities = capabilities,
+    })
+  end,
+  ["clangd"] = function()
+    require("lspconfig").clangd.setup({
+      capabilities = capabilities,
+      cmd = {
+        "clangd",
+        "--offset-encoding=utf-16",
+        "--background-index",
+        "--suggest-missing-includes",
+        "-j=8",
+        "--enable-config",
+      },
+    })
+  end,
+})
 vim.lsp.set_log_level("off")
 
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
@@ -231,13 +291,32 @@ vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action
 vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
 
+-- ==========================================
+-- 代码大纲 Aerial
+-- ==========================================
+require("aerial").setup({
+  layout = { max_width = { 40, 0.2 }, min_width = 20 },
+})
+vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>", { desc = "Toggle Aerial Outline" })
+
+-- ==========================================
+-- 补全引擎 (集成 LuaSnip)
+-- ==========================================
+local luasnip = require("luasnip")
+local cmp = require("cmp")
+
 local has_words_before = function()
   unpack = unpack or table.unpack
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
   return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 end
-local cmp = require("cmp")
+
 cmp.setup({
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
   window = {
     documentation = cmp.config.window.bordered(),
     completion = cmp.config.window.bordered(),
@@ -259,16 +338,21 @@ cmp.setup({
   }),
   sources = cmp.config.sources({
     { name = "nvim_lsp" },
+    { name = "luasnip" },
   }, {
     { name = "buffer" },
   }),
 })
 
+-- ==========================================
+-- 杂项工具与辅助
+-- ==========================================
 require("trouble").setup({})
 require("better_escape").setup {
   default_mappings = false,
   mappings = {
-    i = { j = { k = "<Esc>" }}
+    i = { j = { k = "<Esc>" }},
+    t = { j = { k = "<C-\\><C-n>" }}
   }
 }
 
@@ -318,23 +402,14 @@ vim.keymap.set('n', '<leader>hS', gitsigns.stage_buffer, { desc = "Stage buffer"
 vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk, { desc = "Preview hunk" })
 vim.keymap.set('n', '<leader>hi', gitsigns.preview_hunk_inline, { desc = "Preview hunk inline" })
 
-require("auto-save").setup({})
+require("auto-save").setup({
+  debounce_delay = 50
+})
 
+-- Treesitter
 local ts_install = require("nvim-treesitter.install")
 ts_install.prefer_git = true
-ts_install.compilers = { "gcc", "clang" }
-local parsers = require("nvim-treesitter.parsers").get_parser_configs()
-for _, p in pairs(parsers) do
-  p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")
-end
-local ts_install = require("nvim-treesitter.install")
-ts_install.prefer_git = true
-ts_install.compilers = { "gcc", "clang" }
-local parsers = require("nvim-treesitter.parsers").get_parser_configs()
-for _, p in pairs(parsers) do
-  p.install_info.url = p.install_info.url:gsub("https://github.com/", "git@github.com:")
-end
-require("nvim-treesitter.configs").setup({
+require("nvim-treesitter.config").setup({
   ensure_installed = {
     "bash",
     "c",
@@ -378,6 +453,7 @@ require("treesitter-context").setup({
 })
 vim.cmd([[hi TreesitterContextBottom gui=underline guisp=Grey]])
 
+-- FZF
 local fzf = require("fzf-lua")
 fzf.setup({
   winopts = {
@@ -426,54 +502,56 @@ vim.keymap.set("n", "<A-w>", require("osc52").copy_operator, { expr = true })
 vim.keymap.set("n", "<leader>cc", "<leader>c_", { remap = true })
 vim.keymap.set("v", "<A-w>", require("osc52").copy_visual)
 
-vim.cmd([[
-let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
-let g:gutentags_ctags_tagfile = '.tags'
+-- vim.cmd([[
+-- let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+-- let g:gutentags_ctags_tagfile = '.tags'
+--
+-- let s:vim_tags = expand('~/.cache/tags')
+-- let g:gutentags_cache_dir = s:vim_tags
+-- if !isdirectory(s:vim_tags)
+--     silent! call mkdir(s:vim_tags, 'p')
+-- endif
+--
+-- let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
+-- let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+-- let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+-- let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
+-- let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
+-- if filereadable(".gitignore")
+--     let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
+-- endif
+-- if executable('rg')
+--     let g:gutentags_file_list_command = 'rg --files'
+-- endif
+-- ]])
 
-let s:vim_tags = expand('~/.cache/tags')
-let g:gutentags_cache_dir = s:vim_tags
-if !isdirectory(s:vim_tags)
-    silent! call mkdir(s:vim_tags, 'p')
-endif
+vim.g.vimtex_view_method = 'general'
+vim.g.vimtex_compiler_method = 'latexmk'
 
-let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
-let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
-let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
-let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
-let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
-if filereadable(".gitignore")
-    let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
-endif
-if executable('rg')
-    let g:gutentags_file_list_command = 'rg --files'
-endif
-]])
-
--- require("ibl").setup({
---   scope = { enabled = false },
--- })
 require("guess-indent").setup({})
 require("bigfile").setup()
-
-vim.cmd([[
-let g:copilot_proxy = getenv('http_proxy')
-imap <silent><script><expr> <C-\> copilot#Accept("\<CR>")
-let g:copilot_no_tab_map = v:true
-]])
 
 require("illuminate").configure({
   -- delay = 0,
   under_cursor = false,
 })
 
--- require("nvim-tree").setup {}
-
-require("rsync-build").setup()
-local rb = require("rsync-build")
-vim.keymap.set("n", "<leader>l", function()
-  rb.upload_dir()
-end, { desc = "Send file rsync-build" })
-vim.keymap.set("n", "<leader>;", function()
-  rb.do_action()
-end, { desc = "Send file rsync-build" })
-
+require("copilot").setup({
+  suggestion = {
+    enabled = true,
+    auto_trigger = true,
+    keymap = {
+      accept = "<C-\\>",
+      accept_word = false,
+      accept_line = false,
+      next = "<M-]>",
+      prev = "<M-[>",
+      dismiss = "<C-]>",
+    },
+  },
+  filetypes = {
+    markdown = true,
+    help = false,
+    gitcommit = false,
+  },
+})

@@ -11,6 +11,12 @@ local function open_remote_ssh_term(opts)
             ssh_host    = "shenchao" 
         },
     }
+    local debug_mode = false
+    local function debug_log(msg, level)
+        if debug_mode then
+            vim.notify(msg, level or vim.log.levels.INFO)
+        end
+    end
 
     local current_file_dir = vim.fn.expand('%:p:h')
     if current_file_dir == "" then current_file_dir = vim.fn.getcwd() end
@@ -39,11 +45,6 @@ local function open_remote_ssh_term(opts)
         string.format("cd %q && exec $SHELL", target_remote_dir)
     }
 
-    -- 状态捕获闭包变量
-    local cmd_start_time = nil
-    local in_tui_mode = false -- 新增：备用屏幕缓冲区状态机标识
-    local long_cmd_threshold = 5 -- 长命令判定阈值（秒），可依需修改
-
     -- 跨平台桌面系统通知实现
     local function trigger_notification(duration)
         local msg = string.format("Remote command finished in %ds", duration)
@@ -65,6 +66,11 @@ local function open_remote_ssh_term(opts)
         end
     end
 
+    -- 状态捕获闭包变量
+    local cmd_start_time = nil
+    local in_tui_mode = false -- 新增：备用屏幕缓冲区状态机标识
+    local long_cmd_threshold = 5 -- 长命令判定阈值（秒），可依需修改
+
     local term_opts = {
         on_stdout = function(_, data, _)
             if not data then return end
@@ -76,12 +82,14 @@ local function open_remote_ssh_term(opts)
             if chunk:find('\27%[%?1049h') or chunk:find('\27%[%?47h') then
                 in_tui_mode = true
                 cmd_start_time = nil -- 丢弃当前计时，避免累计
+                debug_log("[TUI Mode] 进入备用屏幕缓冲区", vim.log.levels.INFO)
             end
 
             -- 检测退出备用屏幕缓冲区 (如退出 Vim)
             if chunk:find('\27%[%?1049l') or chunk:find('\27%[%?47l') then
                 in_tui_mode = false
                 cmd_start_time = nil -- 重置计时器，防止紧接着出现的 PS1 触发误报
+                debug_log("[TUI Mode] 退出备用屏幕缓冲区", vim.log.levels.INFO)
             end
 
             -- 处于 TUI 模式时，挂起一切提示符匹配逻辑
@@ -98,33 +106,34 @@ local function open_remote_ssh_term(opts)
             -- 剔除 CSI (Control Sequence Introducer) 和 OSC (Operating System Command) 的 ANSI 转移序列
             local clean_line = last_line:gsub('\x1b%[[%d;]*[a-zA-Z]', ''):gsub('\x1b%].-\x07', '')
 
-            -- 验证终端提示符 (支持常规 Bash/Zsh/Fish: 以 $, #, %, 或 > 结尾)
-            local is_prompt = clean_line:match("[%#%$%%>]%s*$") ~= nil
+            -- 验证终端提示符 (支持常规 Bash/Zsh/Fish: 以 $, #, % 结尾)
+            local is_prompt = clean_line:match("[%#%$%%]%s.*$") ~= nil
 
             if is_prompt then
                 -- 检测到提示符，计算执行时间差
                 if cmd_start_time then
                     local duration = os.time() - cmd_start_time
+                    debug_log("[Prompt] 输出含提示符。距上次敲击回车耗时: " .. duration .. "s", vim.log.levels.DEBUG)
+                    
                     if duration >= long_cmd_threshold then
-                        trigger_notification(duration)
+                        debug_log("[ALERT] 长命令执行完毕！耗时: " .. duration .. "s", vim.log.levels.WARN)
+                        if trigger_notification then trigger_notification(duration) end
                     end
                     cmd_start_time = nil
                 end
             else
                 -- 未检测到提示符，视为有进程执行或键盘输入
-                if not cmd_start_time then
-                    -- 修复：通过检测换行符隔离键盘单字回显与回车执行
-                    if #data > 1 then
-                        cmd_start_time = os.time()
-                    end
-                end
+                -- 【已移除】：原有的依靠换行符隔离键盘单字回显与回车执行的猜测逻辑
+                -- （该处已被下方更严谨的 <CR> 键盘映射所取代）
             end
         end
     }
 
     -- 创建窗口并打开终端
     vim.cmd("botright 15new") 
-    vim.fn.termopen(ssh_cmd, term_opts)
+    -- vim.fn.termopen(ssh_cmd, term_opts)
+    local bufnr = vim.api.nvim_get_current_buf()
+    local job_id = vim.fn.termopen(ssh_cmd, term_opts)
 
     -- 设置一些终端窗口的常用属性
     vim.wo.number = false
@@ -136,6 +145,44 @@ local function open_remote_ssh_term(opts)
     if opts.args and opts.args ~= "" then
         vim.cmd("file " .. opts.args)
     end
+
+    -- 提取出的统一回车/执行逻辑处理函数
+    local function on_terminal_enter()
+        -- 1. 无论何种情况，必须先将真实的回车符发送给 PTY 进程，保证终端正常交互
+        -- 注意：对于 C-j，在大多数 shell 中发送 \n 即可触发执行
+        vim.fn.chansend(job_id, "\r")
+
+        -- 2. 如果在 TUI 内 (如在 SSH 中用 nvim)，完全忽略
+        if in_tui_mode then return end
+
+        -- 3. 获取 Buffer 内容，并解决 "新终端下方全是空白行" 导致抓取不到内容的痛点
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        local last_content_line = ""
+        for i = #lines, 1, -1 do
+            if lines[i] and lines[i]:match("%S") then -- 倒序找到最近的一行包含非空字符的行
+                last_content_line = lines[i]
+                break
+            end
+        end
+
+        -- 4. 剔除 ANSI 转移序列以供验证
+        local clean_line = last_content_line:gsub('\x1b%[[%d;]*[a-zA-Z]', ''):gsub('\x1b%].-\x07', '')
+        
+        -- 5. 判断当前按下回车时，光标所在处是否是 Prompt
+        local is_prompt = clean_line:match("[%#%$%%]%s.*$") ~= nil
+
+        if is_prompt then
+            -- 如果是在提示符后按下的回车，无论它是执行命令还是 zsh 补全确定菜单，都打上时间戳
+            cmd_start_time = os.time()
+            debug_log("[Execute] 在提示符处触发执行，开始计时!", vim.log.levels.INFO)
+        else
+            debug_log("[Execute] 当前不在提示符行，忽略执行事件 (内容: " .. clean_line .. ")", vim.log.levels.DEBUG)
+        end
+    end
+
+    -- 新增：通过拦截终端模式的回车键 (<CR>) 和 Ctrl-j (<C-j>) 来精准判断命令发送时机
+    vim.keymap.set('t', '<CR>', on_terminal_enter, { buffer = bufnr })
+    vim.keymap.set('t', '<C-j>', on_terminal_enter, { buffer = bufnr })
 end
 
 -- 注册命令，nargs = '?' 表示参数是可选的 (0个或1个)

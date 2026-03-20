@@ -64,7 +64,7 @@ require("lazy").setup({
       build = ":TSUpdate",
     },
     "nvim-treesitter/nvim-treesitter-context",
-    -- "ludovicchabant/vim-gutentags",
+    "ludovicchabant/vim-gutentags",
     "shellRaining/hlchunk.nvim",
     "NMAC427/guess-indent.nvim",
 
@@ -345,11 +345,6 @@ local has_words_before = function()
 end
 
 cmp.setup({
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
   window = {
     completion = cmp.config.window.bordered({
       border = 'rounded', -- 可选 'single', 'double', 'shadow', 'rounded'
@@ -377,7 +372,6 @@ cmp.setup({
   }),
   sources = cmp.config.sources({
     { name = "nvim_lsp" },
-    { name = "luasnip" },
   }, {
     { name = "buffer" },
   }),
@@ -541,28 +535,29 @@ vim.keymap.set("n", "<A-w>", require("osc52").copy_operator, { expr = true })
 vim.keymap.set("n", "<leader>cc", "<leader>c_", { remap = true })
 vim.keymap.set("v", "<A-w>", require("osc52").copy_visual)
 
--- vim.cmd([[
--- let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
--- let g:gutentags_ctags_tagfile = '.tags'
---
--- let s:vim_tags = expand('~/.cache/tags')
--- let g:gutentags_cache_dir = s:vim_tags
--- if !isdirectory(s:vim_tags)
---     silent! call mkdir(s:vim_tags, 'p')
--- endif
---
--- let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
--- let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
--- let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
--- let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
--- let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
--- if filereadable(".gitignore")
---     let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
--- endif
--- if executable('rg')
---     let g:gutentags_file_list_command = 'rg --files'
--- endif
--- ]])
+vim.cmd([[
+let g:gutentags_ctags_executable = '/opt/homebrew/bin/ctags'
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
+let g:gutentags_ctags_tagfile = '.tags'
+
+let s:vim_tags = expand('~/.cache/tags')
+let g:gutentags_cache_dir = s:vim_tags
+if !isdirectory(s:vim_tags)
+    silent! call mkdir(s:vim_tags, 'p')
+endif
+
+let g:gutentags_ctags_extra_args = ['--fields=+niaz', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+pxI']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--python-kinds=-iv']
+let g:gutentags_ctags_extra_args += ['--exclude=*.md --exclude=*.json --exclude=build --exclude=_skbuild']
+if filereadable(".gitignore")
+    let g:gutentags_ctags_extra_args += ['--exclude=@.gitignore']
+endif
+if executable('rg')
+    let g:gutentags_file_list_command = 'rg --files'
+endif
+]])
 
 vim.g.vimtex_view_method = 'general'
 vim.g.vimtex_compiler_method = 'latexmk'

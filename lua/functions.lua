@@ -1,16 +1,27 @@
+local projects = {
+    {
+        local_root  = "/Users/dym/Git/shenchao-MatRIS/MatRIS",
+        remote_root = "/home/share/duyiming/MatRIS",
+        ssh_host    = "shenchao_tjmp" 
+    },
+    {
+        local_root  = "/Users/dym/Git/hbm_lib_dev",
+        remote_root = "/home/dym/code/gb2026/7.shenchao-hbm_lib",
+        ssh_host    = "desktop" 
+    },
+    -- {
+    --     local_root  = "/Users/dym/Git/hbm_lib_dev",
+    --     remote_root = "/home/share/duyiming/hbm_lib_dev",
+    --     ssh_host    = "shenchao" 
+    -- },
+    -- {
+    --     local_root  = "/Users/dym/Git/hbm_lib_dev",
+    --     remote_root = "/home/share/guozhuoqiang/duyiming/hbm_lib_dev",
+    --     ssh_host    = "shenchao_gzq" 
+    -- },
+}
+
 local function open_remote_ssh_term(opts)
-    local projects = {
-        {
-            local_root  = "/Users/dym/Git/shenchao-MatRIS/MatRIS",
-            remote_root = "/home/share/duyiming/MatRIS",
-            ssh_host    = "shenchao" 
-        },
-        {
-            local_root  = "/Users/dym/Git/hbm_lib_dev",
-            remote_root = "/home/share/duyiming/hbm_lib_dev",
-            ssh_host    = "shenchao" 
-        },
-    }
     local debug_mode = false
     local function debug_log(msg, level)
         if debug_mode then
@@ -52,9 +63,8 @@ local function open_remote_ssh_term(opts)
 
         if os_name == "Darwin" then
             -- macOS: 使用 osascript 调用系统级通知和提示音
-            local notify_cmd = string.format([[osascript -e 'display notification "%s" with title "Neovim SSH"']], msg)
-            os.execute(notify_cmd .. " &")
-            os.execute("afplay -v 30 /System/Library/Sounds/Ping.aiff &")
+            local notify_cmd = string.format([[osascript -e 'display notification "%s" with title "Neovim SSH"' & afplay -v 30 /System/Library/Sounds/Ping.aiff &]], msg)
+            os.execute(notify_cmd)
         elseif os_name == "Linux" then
             -- Linux: 使用 notify-send 并附加基于 paplay 或 terminal bell 的声音支持
             os.execute(string.format("notify-send \"Neovim SSH\" \"%s\" -u normal &", msg))
@@ -136,9 +146,9 @@ local function open_remote_ssh_term(opts)
     local job_id = vim.fn.termopen(ssh_cmd, term_opts)
 
     -- 设置一些终端窗口的常用属性
-    vim.wo.number = false
-    vim.wo.relativenumber = false
-    vim.wo.signcolumn = "no"
+    vim.opt_local.number = false
+    vim.opt_local.relativenumber = false
+    vim.opt_local.signcolumn = "no"
 
     -- 4. 如果传了参数，则设置 Buffer 名字
     -- opts.args 是用户输入的字符串
@@ -189,4 +199,38 @@ end
 vim.api.nvim_create_user_command('RemoteTerm', open_remote_ssh_term, {
     nargs = '?',
     desc = 'Open SSH terminal with optional buffer name'
+})
+
+-- 用法: :SetRemoteConfig <Host> <RemoteRoot>
+-- 示例: :SetRemoteConfig backup-server /home/data/dym/MatRIS
+vim.api.nvim_create_user_command('SetRemoteConfig', function(cmd_opts)
+    -- 使用 f-args 获取空格分隔的参数列表
+    local args = cmd_opts.fargs
+    if #args < 2 then
+        print("Usage: :SetRemoteConfig <hostname> <remote_root>")
+        return
+    end
+
+    local new_host = args[1]
+    local new_remote_root = args[2]
+
+    local current_file_dir = vim.fn.expand('%:p:h')
+    if current_file_dir == "" then current_file_dir = vim.fn.getcwd() end
+
+    local found = false
+    for _, project in ipairs(projects) do
+        if current_file_dir:find(project.local_root, 1, true) == 1 then
+            project.ssh_host = new_host
+            project.remote_root = new_remote_root
+            found = true
+            print(string.format("Updated [%s]\nHost: %s\nRemoteRoot: %s", project.local_root, new_host, new_remote_root))
+        end
+    end
+
+    if not found then
+        print("Error: Current directory is not within any defined local_root.")
+    end
+end, {
+    nargs = '+',
+    desc = 'Update both ssh_host and remote_root for the current project'
 })

@@ -108,13 +108,28 @@ vim.api.nvim_create_autocmd("FileType", {
   group = group,
   pattern = { "markdown", "tex" },
   callback = function(args)
-    vim.opt_local.wrap = true
-    local opts = { silent = true, buffer = args.buf, }
-    vim.keymap.set('n', 'j', 'gj', opts)
-    vim.keymap.set('n', 'k', 'gk', opts)
-    vim.keymap.set('n', '0', 'g0', opts)
-    vim.keymap.set('n', '^', 'g^', opts)
+    local opts = { 
+      silent = true, 
+      buffer = args.buf, 
+      expr = true, 
+      replace_keycodes = true -- 确保返回的字符被正确解析
+    }
 
+    -- 1. 处理 j/k 的动态逻辑 (使用 expr 模式)
+    vim.keymap.set('n', 'j', function()
+      return vim.v.count == 0 and 'gj' or 'j'
+    end, opts)
+
+    vim.keymap.set('n', 'k', function()
+      return vim.v.count == 0 and 'gk' or 'k'
+    end, opts)
+
+    -- 2. 处理 0/^ 的逻辑
+    -- 注意：由于 opts 开启了 expr，这里的映射目标需要写成字符串表达式（带引号）
+    vim.keymap.set('n', '0', [['g0']], opts)
+    vim.keymap.set('n', '^', [['g^']], opts)
+
+    vim.opt_local.wrap = true
     vim.opt_local.tabstop = 2
     vim.opt_local.shiftwidth = 2
     vim.opt_local.softtabstop = 2
@@ -134,4 +149,37 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.smartindent = false
   end,
   desc = "Fix python comment indentation for << and >>",
+})
+
+-- 自定义statusline
+local modes = {
+  ['n']  = 'NORMAL',
+  ['i']  = 'INSERT',
+  ['v']  = 'VISUAL',
+  ['V']  = 'V-LINE',
+  [''] = 'V-BLOCK',
+  ['c']  = 'COMMAND',
+  ['R']  = 'REPLACE',
+  ['t']  = 'INSERT',
+  ['nt'] = 'NORMAL',
+}
+function _G.my_statusline()
+  local m = vim.api.nvim_get_mode().mode
+  local mode_str = string.format("[%s] ", modes[m] or m)
+  
+  -- 组合字符串：
+  -- %f: 文件名  %m: 修改标记  %=: 左右分割  %l,%c: 行,列  %P: 百分比
+  return mode_str .. "%f %m%=%l,%c %P "
+end
+vim.opt.statusline = "%!v:lua.my_statusline()"
+
+-- 强制终端在进入时停留在 Normal 模式
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+    pattern = "term://*",
+    callback = function()
+        -- 延迟一小会儿执行，确保在插件逻辑之后运行
+        vim.schedule(function()
+            vim.cmd("stopinsert")
+        end)
+    end,
 })

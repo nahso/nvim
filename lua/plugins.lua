@@ -62,6 +62,7 @@ require("lazy").setup({
     {
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
+      branch = "master",
     },
     "nvim-treesitter/nvim-treesitter-context",
     "ludovicchabant/vim-gutentags",
@@ -73,6 +74,7 @@ require("lazy").setup({
     "stevearc/aerial.nvim",
 
     "nvim-lua/plenary.nvim",
+    "klen/nvim-config-local",
   },
 })
 
@@ -191,20 +193,12 @@ require("flash").setup({
   modes = {
     -- 针对 f, F, t, T, ;, , 运动的特定设置
     char = {
-      enabled = true,
-      -- 1. 禁用跨行匹配，仅限当前行
-      multi_line = false,
-      -- 2. 核心修改：显式禁用字符查找模式下的背景变暗效果
-      highlight = { 
-        backdrop = false 
-      },
-      -- 保持你的默认键位行为
-      jump_labels = false,
+      enabled = false,
     },
   },
 })
 vim.keymap.set({ "n", "x", "o" }, "s", function() require("flash").jump() end, { desc = "Flash" })
-vim.keymap.set({ "n", "x", "o" }, "S", function() require("flash").treesitter() end, { desc = "Flash Treesitter" })
+-- vim.keymap.set({ "n", "x", "o" }, "S", function() require("flash").treesitter() end, { desc = "Flash Treesitter" })
 
 require("mini.ai").setup()
 
@@ -252,43 +246,50 @@ au BufReadPost * lua require('lint').try_lint()
 -- ==========================================
 -- LSP & Mason 配置
 -- ==========================================
-local function ensure_ts_cli()
-  -- 1. 检查系统 PATH 或 Mason 路径下是否已存在二进制
-  if vim.fn.executable("tree-sitter") == 1 then
-    return
-  end
-
-  -- 2. 检查 Mason 是否可用
-  local ok, mr = pcall(require, "mason-registry")
-  if not ok then
-    vim.notify("mason-registry not found", vim.log.levels.WARN)
-    return
-  end
-
-  -- 3. 获取并安装工具
-  local package_name = "tree-sitter-cli"
-  
-  -- 确保在注册表刷新后操作（异步安装流程）
-  mr.refresh(function()
-    local p = mr.get_package(package_name)
-    if not p:is_installed() then
-      vim.notify("Installing tree-sitter-cli via Mason...", vim.log.levels.INFO)
-      p:install():once("terminate", function(success)
-        if success then
-          vim.notify("tree-sitter-cli installed successfully.", vim.log.levels.INFO)
-          -- 安装成功后，手动将 Mason 的 bin 目录临时加入 PATH 供当前进程使用
-          local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
-          vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
-        else
-          vim.notify("Failed to install tree-sitter-cli.", vim.log.levels.ERROR)
-        end
-      end)
-    end
-  end)
-end
+-- local function ensure_ts_cli()
+--   -- 1. 检查系统 PATH 下是否已存在
+--   -- 【注意】：如果你系统全局（如通过 Homebrew/npm）已经安装了其他版本的 tree-sitter，
+--   -- 这段逻辑会直接 return，导致 Mason 不会介入。
+--   -- 如果你想强制由 Mason 接管并锁定版本，建议注释掉这段，或者加入版本号对比逻辑。
+--   if vim.fn.executable("tree-sitter") == 1 then
+--     return
+--   end
+--
+--   -- 2. 检查 Mason 是否可用
+--   local ok, mr = pcall(require, "mason-registry")
+--   if not ok then
+--     vim.notify("mason-registry not found", vim.log.levels.WARN)
+--     return
+--   end
+--
+--   -- 3. 获取并安装工具
+--   local package_name = "tree-sitter-cli"
+--   local target_version = "0.25.10" -- 在这里强制指定版本号
+--
+--   -- 确保在注册表刷新后操作（异步安装流程）
+--   mr.refresh(function()
+--     local p = mr.get_package(package_name)
+--
+--     if not p:is_installed() then
+--       vim.notify("Installing " .. package_name .. "@" .. target_version .. " via Mason...", vim.log.levels.INFO)
+--
+--       -- 【核心改动】：在这里传入 { version = target_version }
+--       p:install({ version = target_version }):once("terminate", function(success)
+--         if success then
+--           vim.notify("tree-sitter-cli " .. target_version .. " installed successfully.", vim.log.levels.INFO)
+--           -- 安装成功后，手动将 Mason 的 bin 目录临时加入 PATH 供当前进程使用
+--           local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+--           vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+--         else
+--           vim.notify("Failed to install tree-sitter-cli.", vim.log.levels.ERROR)
+--         end
+--       end)
+--     end
+--   end)
+-- end
 
 require("mason").setup()
-ensure_ts_cli()
+-- ensure_ts_cli()
 
 require("mason-lspconfig").setup({
   ensure_installed = { "clangd", "pyright", "ruff", "texlab" }
@@ -442,7 +443,7 @@ require("auto-save").setup({
 -- Treesitter
 local ts_install = require("nvim-treesitter.install")
 ts_install.prefer_git = true
-require("nvim-treesitter.config").setup({
+require("nvim-treesitter.configs").setup({
   ensure_installed = {
     "bash",
     "c",
@@ -457,7 +458,6 @@ require("nvim-treesitter.config").setup({
     "yaml",
     "cuda",
   },
-  disable = { "latex" },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -559,7 +559,11 @@ if executable('rg')
 endif
 ]])
 
-vim.g.vimtex_view_method = 'general'
+if vim.loop.os_uname().sysname == "Darwin" then
+  vim.g.vimtex_view_method = 'skim'
+else
+  vim.g.vimtex_view_method = 'zathura'
+end
 vim.g.vimtex_compiler_method = 'latexmk'
 
 require("guess-indent").setup({})
@@ -588,4 +592,12 @@ require("copilot").setup({
     help = false,
     gitcommit = false,
   },
+})
+
+require("config-local").setup({
+  config_files = { ".nvim.lua", ".nvimrc.lua", ".exrc.lua" },
+  hashfile = vim.fn.stdpath("data") .. "/config-local",
+  autocommands_create = true,
+  commands_create = true,
+  silent_chdir = true,
 })

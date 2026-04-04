@@ -145,6 +145,10 @@ local function open_remote_ssh_term(opts)
     local bufnr = vim.api.nvim_get_current_buf()
     local job_id = vim.fn.termopen(ssh_cmd, term_opts)
 
+    vim.bo[bufnr].bufhidden = 'hide'  -- 防止 Buffer 隐藏时自动删除
+    vim.bo[bufnr].buflisted = true    -- 确保在 :ls 中可见
+    vim.bo[bufnr].modified = false    -- 标记为未修改，防止退出时询问
+
     -- 设置一些终端窗口的常用属性
     vim.opt_local.number = false
     vim.opt_local.relativenumber = false
@@ -233,4 +237,41 @@ vim.api.nvim_create_user_command('SetRemoteConfig', function(cmd_opts)
 end, {
     nargs = '+',
     desc = 'Update both ssh_host and remote_root for the current project'
+})
+
+local function cleanup_exited_terminals()
+    local bufs = vim.api.nvim_list_bufs()
+    local closed_count = 0
+
+    for _, bufnr in ipairs(bufs) do
+        -- 确认该 buffer 是有效终端
+        if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].buftype == 'terminal' then
+            -- 获取终端对应的 job_id
+            local success, job_id = pcall(vim.api.nvim_buf_get_var, bufnr, "terminal_job_id")
+
+            if success and job_id then
+                -- jobwait({id}, timeout) 
+                -- timeout 为 0 表示立即返回状态而不等待
+                -- 返回值: -1 = 正在运行, 0 或正数 = 退出码, -2 = 无效 ID
+                local status = vim.fn.jobwait({job_id}, 0)[1]
+
+                if status ~= -1 then
+                    -- 进程已退出，强制删除 buffer
+                    vim.api.nvim_buf_delete(bufnr, { force = true })
+                    closed_count = closed_count + 1
+                end
+            end
+        end
+    end
+
+    if closed_count > 0 then
+        vim.notify(string.format("清理完毕：已关闭 %d 个已退出的终端", closed_count), vim.log.levels.INFO)
+    else
+        vim.notify("未发现已退出的终端", vim.log.levels.INFO)
+    end
+end
+
+-- 2. 注册为用户命令，方便通过 :TermClean 调用
+vim.api.nvim_create_user_command('TermClean', cleanup_exited_terminals, {
+    desc = '手动清理所有已经退出的终端 Buffer'
 })

@@ -20,6 +20,7 @@ require("lazy").setup({
   spec = {
     "folke/tokyonight.nvim",
     "Mofiqul/vscode.nvim",
+    "vpoltora/cursor-light.nvim",
     "EdenEast/nightfox.nvim",
     "miikanissi/modus-themes.nvim",
     "nvim-tree/nvim-web-devicons",
@@ -41,7 +42,8 @@ require("lazy").setup({
 
     "echasnovski/mini.ai", -- text objects
     "folke/which-key.nvim",
-    "RRethy/vim-illuminate",
+    "nvim-mini/mini.cursorword",
+    -- "RRethy/vim-illuminate",
     "rickhowe/spotdiff.vim",
 
     "stevearc/conform.nvim",
@@ -81,73 +83,78 @@ require("lazy").setup({
 -- ==========================================
 -- UI & Theme 配置
 -- ==========================================
-vim.o.background = 'dark'
-require('vscode').setup({
-  -- Alternatively set style in setup
-  -- style = 'light'
-  transparent = false,
-
-  -- Enable italic comment
-  italic_comments = false,
-
-  -- Enable italic inlay type hints
-  italic_inlayhints = true,
-
-  -- Underline `@markup.link.*` variants
-  underline_links = true,
-
-  -- Disable nvim-tree background color
-  disable_nvimtree_bg = true,
-
-  -- Apply theme colors to terminal
-  terminal_colors = true,
-
-  group_overrides = {
-    CursorLine = { bg = '#333333' },
-
-    -- 1. 非当前匹配项：不那么亮眼的橙色（使用更深的橙色以减少亮度，但保持显眼）
-    Search = { 
-      fg = '#ffffff', 
-      bg = '#daa520',
-      bold = true,
-    },
-    
-    -- 2. 当前匹配项：保持亮绿色以提供对比
-    IncSearch = { 
-      fg = '#000000',     -- 黑色文字
-      bg = '#7cfc00',     -- 草绿色/亮绿色背景
-      bold = true,
-    },
-
-    -- 3. 确保新版 Neovim 的 CurSearch 也同步（直接链接到 IncSearch）
-    CurSearch = { link = 'IncSearch' },
-    StatusLine = { fg = '#ffffff', bg = '#007acc', bold = true },
-    -- 不活动状态栏：使用暗蓝色背景，保持白色文字，但不加粗以区分
-    StatusLineNC = { fg = '#ffffff', bg = '#004080', bold = false },
-    -- Diff视图中删除的文本：使用不显眼的红色背景
-    DiffDelete = { bg = '#b22222', fg = '#ffffff', bold = true },
-    -- 修改的行：使用更不显眼的红色背景，比DiffText暗一些
-    DiffChange = { bg = '#8b0000', fg = '#ffffff' },
-    -- 修改行中具体改变的部分：保持亮红色以突出，不能比这个更暗
-    DiffText = { bg = '#ff0000', fg = '#ffffff', bold = true },
-    -- Diff视图中新增的行：使用不显眼的绿色背景，与红色显眼程度一致
-    DiffAdd = { bg = '#006400', fg = '#ffffff' },
-
-    -- Flash: 待跳转字符 (Label) 颜色，使用洋红高亮，与搜索的橙/绿明确区分
-    FlashLabel = { bg = '#ff00ff', fg = '#ffffff', bold = true },
-    -- Flash: 输入停顿时已匹配的背景文本颜色，使用深灰降低视觉干扰
-    FlashMatch = { bg = '#555555', fg = '#ffffff' },
-    -- Flash: 当前光标所在匹配项
-    FlashCurrent = { link = 'IncSearch' },
-  },
+-- vim.o.background = 'dark'
+-- require('vscode').setup({
+--   -- Alternatively set style in setup
+--   -- style = 'light'
+--   transparent = false,
+-- 
+--   -- Enable italic comment
+--   italic_comments = false,
+-- 
+--   -- Enable italic inlay type hints
+--   italic_inlayhints = true,
+-- 
+--   -- Underline `@markup.link.*` variants
+--   underline_links = true,
+-- 
+--   -- Disable nvim-tree background color
+--   disable_nvimtree_bg = true,
+-- 
+--   -- Apply theme colors to terminal
+--   terminal_colors = true,
+-- 
+--   group_overrides = {
+--     CursorLine = { bg = '#333333' },
+-- 
+--     -- 1. 非当前匹配项：不那么亮眼的橙色（使用更深的橙色以减少亮度，但保持显眼）
+--     Search = { 
+--       fg = '#ffffff', 
+--       bg = '#daa520',
+--       bold = true,
+--     },
+--     
+--     -- 2. 当前匹配项：保持亮绿色以提供对比
+--     IncSearch = { 
+--       fg = '#000000',     -- 黑色文字
+--       bg = '#7cfc00',     -- 草绿色/亮绿色背景
+--       bold = true,
+--     },
+-- 
+--     -- 3. 确保新版 Neovim 的 CurSearch 也同步（直接链接到 IncSearch）
+--     CurSearch = { link = 'IncSearch' },
+--     StatusLine = { fg = '#ffffff', bg = '#007acc', bold = true },
+--     -- 不活动状态栏：使用暗蓝色背景，保持白色文字，但不加粗以区分
+--     StatusLineNC = { fg = '#ffffff', bg = '#004080', bold = false },
+--     -- Diff视图中删除的文本：使用不显眼的红色背景
+--     DiffDelete = { bg = '#b22222', fg = '#ffffff', bold = true },
+--     -- 修改的行：使用更不显眼的红色背景，比DiffText暗一些
+--     DiffChange = { bg = '#8b0000', fg = '#ffffff' },
+--     -- 修改行中具体改变的部分：保持亮红色以突出，不能比这个更暗
+--     DiffText = { bg = '#ff0000', fg = '#ffffff', bold = true },
+--     -- Diff视图中新增的行：使用不显眼的绿色背景，与红色显眼程度一致
+--     DiffAdd = { bg = '#006400', fg = '#ffffff' },
+-- 
+--     -- Flash: 待跳转字符 (Label) 颜色，使用洋红高亮，与搜索的橙/绿明确区分
+--     FlashLabel = { bg = '#ff00ff', fg = '#ffffff', bold = true },
+--     -- Flash: 输入停顿时已匹配的背景文本颜色，使用深灰降低视觉干扰
+--     FlashMatch = { bg = '#555555', fg = '#ffffff' },
+--     -- Flash: 当前光标所在匹配项
+--     FlashCurrent = { link = 'IncSearch' },
+--   },
+-- })
+-- vim.cmd.colorscheme "vscode"
+require('cursor-light').setup({
+  ui = false,
 })
-vim.cmd.colorscheme "vscode"
+vim.cmd.colorscheme('cursor-light')
 
 -- ==========================================
 -- 核心操作类插件配置
 -- ==========================================
 require("nvim-surround").setup()
 require("oil").setup({
+  columns = {},
   float = {
     padding = 2,
     max_width = 0,
@@ -318,7 +325,7 @@ require("mason-lspconfig").setup({
     })
   end,
 })
-vim.lsp.set_log_level("off")
+vim.lsp.log.set_level("off")
 
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename" })
 vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code Action" })
@@ -436,8 +443,40 @@ vim.keymap.set('n', '<leader>hS', gitsigns.stage_buffer, { desc = "Stage buffer"
 vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk, { desc = "Preview hunk" })
 vim.keymap.set('n', '<leader>hi', gitsigns.preview_hunk_inline, { desc = "Preview hunk inline" })
 
+local excluded_filetypes = {
+  -- this one is especially useful if you use neovim as a commit message editor
+  "gitcommit",
+  -- most of these are usually set to non-modifiable, which prevents autosaving
+  -- by default, but it doesn't hurt to be extra safe.
+  "NvimTree",
+  "Outline",
+  "TelescopePrompt",
+  "alpha",
+  "dashboard",
+  "lazygit",
+  "neo-tree",
+  "oil",
+  "prompt",
+  "toggleterm",
+}
+
+local excluded_filenames = {
+  "do-not-autosave-me.lua"
+}
+
+local function save_condition(buf)
+  if
+    vim.tbl_contains(excluded_filetypes, vim.fn.getbufvar(buf, "&filetype"))
+    or vim.tbl_contains(excluded_filenames, vim.fn.expand("%:t"))
+  then
+    return false
+  end
+  return true
+end
+
 require("auto-save").setup({
-  debounce_delay = 50
+  debounce_delay = 50,
+  condition = save_condition
 })
 
 -- Treesitter
@@ -569,10 +608,11 @@ vim.g.vimtex_compiler_method = 'latexmk'
 require("guess-indent").setup({})
 require("bigfile").setup()
 
-require("illuminate").configure({
-  -- delay = 0,
-  under_cursor = false,
-})
+require('mini.cursorword').setup()
+-- require("illuminate").configure({
+--   -- delay = 0,
+--   under_cursor = false,
+-- })
 
 require("copilot").setup({
   suggestion = {

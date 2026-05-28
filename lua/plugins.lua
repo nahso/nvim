@@ -575,7 +575,17 @@ vim.keymap.set("n", "<leader>cc", "<leader>c_", { remap = true })
 vim.keymap.set("v", "<A-w>", require("osc52").copy_visual)
 
 vim.cmd([[
-let g:gutentags_ctags_executable = '/opt/homebrew/bin/ctags'
+if has('macunix')
+	let g:gutentags_ctags_executable = '/opt/homebrew/bin/ctags'
+	if !executable(g:gutentags_ctags_executable)
+		let g:gutentags_ctags_executable = '/usr/local/bin/ctags'
+	endif
+	if !executable(g:gutentags_ctags_executable)
+		let g:gutentags_ctags_executable = exepath('ctags')
+	endif
+else
+	let g:gutentags_ctags_executable = exepath('ctags')
+endif
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.project']
 let g:gutentags_ctags_tagfile = '.tags'
 

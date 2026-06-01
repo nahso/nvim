@@ -64,7 +64,8 @@ require("lazy").setup({
     {
       "nvim-treesitter/nvim-treesitter",
       build = ":TSUpdate",
-      branch = "master",
+      branch = "main",
+      main = "nvim-treesitter.config",
     },
     "nvim-treesitter/nvim-treesitter-context",
     "ludovicchabant/vim-gutentags",
@@ -482,7 +483,7 @@ require("auto-save").setup({
 -- Treesitter
 local ts_install = require("nvim-treesitter.install")
 ts_install.prefer_git = true
-require("nvim-treesitter.configs").setup({
+require("nvim-treesitter.config").setup({
   ensure_installed = {
     "bash",
     "c",
